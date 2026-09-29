@@ -82,13 +82,21 @@
             display: block;
         }
 
-        /* Pantalla de Login */
+        /* Pantalla de Login con Logo Grande */
         .login-box {
             max-width: 350px;
-            margin: 30px auto;
+            margin: 20px auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            align-items: center;
+        }
+
+        .login-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            margin-bottom: 5px;
         }
 
         /* Pantalla de Inicio (Home) */
@@ -336,7 +344,7 @@
             color: var(--primary-color);
         }
 
-        /* Estructura para impresión individual de comprobante con Logo y Datos Oficiales */
+        /* Estructura para impresión individual de comprobante con Logo Grande */
         .print-ticket {
             display: none;
         }
@@ -351,7 +359,7 @@
                 color: #000;
             }
             .ticket-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-            .ticket-header img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
+            .ticket-header img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 8px; }
             .ticket-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-footer { margin-top: 30px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; font-size: 12px; line-height: 1.5; }
         }
@@ -408,15 +416,16 @@
     </div>
     <div class="subtitle">Sistema de Registro y Agendamiento de Citas</div>
 
-    <!-- PANTALLA 0: LOGIN -->
+    <!-- PANTALLA 0: LOGIN CON LOGO GRANDE -->
     <div id="view-login" class="view active">
         <div class="login-box">
-            <h3 style="text-align: center; color: var(--primary-color); margin-top: 0;">Iniciar Sesión</h3>
-            <div class="form-group">
+            <img src="icono.png" alt="Logo Santa Celia Login" class="login-logo">
+            <h3 style="text-align: center; color: var(--primary-color); margin: 0 0 10px 0;">Iniciar Sesión</h3>
+            <div class="form-group" style="width: 100%;">
                 <label for="loginUser">Usuario</label>
                 <input type="text" id="loginUser" placeholder="Ingrese usuario">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="width: 100%;">
                 <label for="loginPin">PIN</label>
                 <input type="password" id="loginPin" maxlength="6" placeholder="Ingrese PIN">
             </div>
@@ -586,7 +595,7 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO Y DIRECCIÓN/TELÉFONO -->
+<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO GRANDE -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
         <img src="icono.png" alt="Logo Santa Celia">
@@ -659,7 +668,6 @@
         document.getElementById('citaId').value = "SELECCIONE-AREA";
     }
 
-    // Generar ID automático basado en las siglas del área, fecha y hora
     function actualizarIdPorArea() {
         const areaSelect = document.getElementById('area').value;
         if (!areaSelect) return;
@@ -788,7 +796,7 @@
                 return;
             }
 
-            globalCitasData = data.reverse(); // Mostrar más recientes primero
+            globalCitasData = data.reverse();
 
             let html = `
                 <table>
@@ -856,11 +864,24 @@
         const confirmacion = confirm(`¿Está seguro que desea cancelar la cita con ID: ${c.id} para el paciente ${c.paciente}?`);
         
         if (confirmacion) {
-            const row = document.getElementById(`row-${index}`);
-            if (row) {
-                row.remove();
-                alert("La cita ha sido cancelada correctamente.");
-            }
+            // Enviamos petición a Google Sheets para borrar la fila por ID
+            fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "eliminar", id: c.id })
+            })
+            .then(() => {
+                const row = document.getElementById(`row-${index}`);
+                if (row) {
+                    row.remove();
+                }
+                alert("La cita ha sido cancelada y eliminada de Google Sheets correctamente.");
+            })
+            .catch(error => {
+                console.error('Error al eliminar:', error);
+                alert("Hubo un error al eliminar la cita de la hoja de cálculo.");
+            });
         }
     }
 </script>
