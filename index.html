@@ -184,6 +184,29 @@
             background-color: #005f73;
         }
 
+        /* Botón Actualizar Mejorado */
+        .refresh-modern-btn {
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .refresh-modern-btn:hover {
+            background-color: #005f73;
+        }
+        .refresh-modern-btn:active {
+            transform: scale(0.97);
+        }
+
         .service-row {
             display: grid;
             grid-template-columns: 3fr 1fr;
@@ -431,7 +454,7 @@
 
                 <div class="form-group full-width">
                     <label for="area">Área Médica</label>
-                    <select id="area" required>
+                    <select id="area" required onchange="actualizarIdPorArea()">
                         <option value="" disabled selected>Seleccione un área...</option>
                         <option value="MEDICINA GENERAL">MEDICINA GENERAL</option>
                         <option value="ODONTOLOGIA">ODONTOLOGIA</option>
@@ -538,7 +561,10 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0; color: var(--primary-color);">Citas Registradas en el Sistema</h3>
-            <button type="button" class="search-btn" onclick="cargarCitas()">🔄 Actualizar</button>
+            <button type="button" class="refresh-modern-btn" onclick="cargarCitas()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Actualizar Lista
+            </button>
         </div>
 
         <!-- BARRA DE BÚSQUEDA -->
@@ -555,7 +581,7 @@
         </div>
 
         <div id="tablaContenedor" class="table-container">
-            <div class="loading">Cargando citas desde Google Sheets...</div>
+            <div class="loading">Actualizando base de datos, por favor espere...</div>
         </div>
     </div>
 </div>
@@ -585,6 +611,8 @@
 
 <script>
     let globalCitasData = [];
+    let fechaActualGlobal = "";
+    let horaActualGlobal = "";
 
     // Verificación de Login
     function verificarLogin() {
@@ -610,22 +638,42 @@
         if (vista === 'home') document.getElementById('view-home').classList.add('active');
         if (vista === 'form') {
             document.getElementById('view-form').classList.add('active');
-            generarNuevoIdYFecha();
+            inicializarDatosFormulario();
         }
         if (vista === 'list') document.getElementById('view-list').classList.add('active');
     }
 
-    function generarNuevoIdYFecha() {
-        const randomId = 'SC-' + Math.floor(100000 + Math.random() * 900000);
-        document.getElementById('citaId').value = randomId;
-
+    function inicializarDatosFormulario() {
         const ahora = new Date();
-        const fechaStr = ahora.toLocaleDateString();
-        const horaStr = ahora.toLocaleTimeString();
+        const d = String(ahora.getDate()).padStart(2, '0');
+        const m = String(ahora.getMonth() + 1).padStart(2, '0');
+        const y = String(ahora.getFullYear()).slice(-2);
+        
+        fechaActualGlobal = `${d}/${m}/${y}`;
+        horaActualGlobal = ahora.toLocaleTimeString();
 
-        document.getElementById('fechaHoraVisual').value = fechaStr + ' ' + horaStr;
-        document.getElementById('fechaVal').value = fechaStr;
-        document.getElementById('horaVal').value = horaStr;
+        document.getElementById('fechaHoraVisual').value = `${fechaActualGlobal} ${horaActualGlobal}`;
+        document.getElementById('fechaVal').value = fechaActualGlobal;
+        document.getElementById('horaVal').value = horaActualGlobal;
+        document.getElementById('area').selectedIndex = 0;
+        document.getElementById('citaId').value = "SELECCIONE-AREA";
+    }
+
+    // Generar ID automático basado en las siglas del área, fecha y hora
+    function actualizarIdPorArea() {
+        const areaSelect = document.getElementById('area').value;
+        if (!areaSelect) return;
+
+        let sigla = "SC";
+        if (areaSelect.includes("MEDICINA GENERAL")) sigla = "MG";
+        else if (areaSelect.includes("ODONTOLOGIA")) sigla = "OD";
+        else if (areaSelect.includes("LABORATORIO")) sigla = "LAB";
+
+        const fechaPartes = fechaActualGlobal.split('/').join('');
+        const horaPartes = horaActualGlobal.replace(/[^0-9]/g, '');
+
+        const idGenerado = `${sigla}-${fechaPartes}-${horaPartes}`;
+        document.getElementById('citaId').value = idGenerado;
     }
 
     function cargarPrecioAutomatico() {
@@ -730,7 +778,7 @@
 
     function cargarCitas() {
         const contenedor = document.getElementById('tablaContenedor');
-        contenedor.innerHTML = '<div class="loading">Cargando citas desde Google Sheets...</div>';
+        contenedor.innerHTML = '<div class="loading">Actualizando base de datos, por favor espere...</div>';
 
         fetch(URL_APPS_SCRIPT + "?action=leer")
         .then(response => response.json())
@@ -808,7 +856,6 @@
         const confirmacion = confirm(`¿Está seguro que desea cancelar la cita con ID: ${c.id} para el paciente ${c.paciente}?`);
         
         if (confirmacion) {
-            // Eliminamos visualmente la fila de la tabla
             const row = document.getElementById(`row-${index}`);
             if (row) {
                 row.remove();
