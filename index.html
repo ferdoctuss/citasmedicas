@@ -409,14 +409,14 @@
 <body>
 
 <div class="container">
-    <!-- LOGO Y TÍTULO GENERAL -->
-    <div class="brand-header">
+    <!-- LOGO Y TÍTULO GENERAL (Solo visible al estar logueado) -->
+    <div id="mainBrandHeader" class="brand-header" style="display: none;">
         <img src="icono.png" alt="Logo Santa Celia">
         <h2 class="header-title">Centro Médico Integral Santa Celia</h2>
     </div>
-    <div class="subtitle">Sistema de Registro y Agendamiento de Citas</div>
+    <div id="mainSubtitle" class="subtitle" style="display: none;">Sistema de Registro y Agendamiento de Citas</div>
 
-    <!-- PANTALLA 0: LOGIN CON LOGO GRANDE -->
+    <!-- PANTALLA 0: LOGIN CON LOGO GRANDE Y SIN LOGO PEQUEÑO -->
     <div id="view-login" class="view active">
         <div class="login-box">
             <img src="icono.png" alt="Logo Santa Celia Login" class="login-logo">
@@ -623,12 +623,19 @@
     let fechaActualGlobal = "";
     let horaActualGlobal = "";
 
+    // Lista de usuarios y PINs autorizados
+    const usuariosPermitidos = {
+        "USER": "171819"
+    };
+
     // Verificación de Login
     function verificarLogin() {
-        const usuarioInput = document.getElementById('loginUser').value.trim();
+        const usuarioInput = document.getElementById('loginUser').value.trim().toUpperCase();
         const pinInput = document.getElementById('loginPin').value.trim();
 
-        if (usuarioInput === "USER" && pinInput === "171819") {
+        if (usuariosPermitidos[usuarioInput] && usuariosPermitidos[usuarioInput] === pinInput) {
+            document.getElementById('mainBrandHeader').style.display = 'flex';
+            document.getElementById('mainSubtitle').style.display = 'block';
             cambiarVista('home');
         } else {
             alert("Usuario o PIN incorrectos. Por favor, intente nuevamente.");
@@ -638,6 +645,8 @@
     function cerrarSesion() {
         document.getElementById('loginUser').value = '';
         document.getElementById('loginPin').value = '';
+        document.getElementById('mainBrandHeader').style.display = 'none';
+        document.getElementById('mainSubtitle').style.display = 'none';
         cambiarVista('login');
     }
 
@@ -828,7 +837,7 @@
                         <td data-label="Acciones">
                             <div class="table-actions-container">
                                 <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️ Imprimir</button>
-                                <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar</button>
+                                <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar Cita</button>
                             </div>
                         </td>
                     </tr>
@@ -864,7 +873,6 @@
         const confirmacion = confirm(`¿Está seguro que desea cancelar la cita con ID: ${c.id} para el paciente ${c.paciente}?`);
         
         if (confirmacion) {
-            // Enviamos petición a Google Sheets para borrar la fila por ID
             fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
                 mode: 'no-cors',
