@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Centro Médico Integral Santa Celia</title>
     
-    <!-- CONFIGURACIÓN PARA IPHONE -->
+    <!-- ICONOS Y CONFIGURACIÓN PARA IPHONE -->
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" href="icono.png" type="image/png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Santa Celia">
@@ -41,12 +43,26 @@
             box-sizing: border-box;
         }
 
-        .header-title {
-            text-align: center;
-            color: var(--primary-color);
+        /* Estilos del Logo y Título Superior */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             margin-bottom: 5px;
+        }
+
+        .brand-header img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+        }
+
+        .header-title {
+            color: var(--primary-color);
+            margin: 0;
             text-transform: uppercase;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 800;
         }
 
@@ -66,14 +82,23 @@
             display: block;
         }
 
+        /* Pantalla de Login */
+        .login-box {
+            max-width: 350px;
+            margin: 30px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
         /* Pantalla de Inicio (Home) */
         .home-menu {
             display: flex;
             flex-direction: column;
             gap: 20px;
             align-items: center;
-            margin-top: 40px;
-            margin-bottom: 40px;
+            margin-top: 30px;
+            margin-bottom: 30px;
         }
 
         .menu-btn {
@@ -274,14 +299,14 @@
             color: var(--primary-color);
         }
 
-        /* Estructura para impresión individual de comprobante */
+        /* Estructura para impresión individual de comprobante con Logo */
         .print-ticket {
             display: none;
         }
 
         @media print {
             body { background: white; padding: 0; }
-            .container, .view, .home-menu, .search-container, .menu-btn, .header-title, .subtitle, .table-container { display: none !important; }
+            .container, .view, .home-menu, .search-container, .menu-btn, .brand-header, .subtitle, .table-container { display: none !important; }
             .print-ticket {
                 display: block !important;
                 padding: 20px;
@@ -289,6 +314,7 @@
                 color: #000;
             }
             .ticket-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+            .ticket-header img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
             .ticket-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-footer { margin-top: 30px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; font-size: 12px; }
         }
@@ -338,15 +364,36 @@
 <body>
 
 <div class="container">
-    <h2 class="header-title">Centro Médico Integral Santa Celia</h2>
+    <!-- LOGO Y TÍTULO GENERAL -->
+    <div class="brand-header">
+        <img src="icono.png" alt="Logo Santa Celia">
+        <h2 class="header-title">Centro Médico Integral Santa Celia</h2>
+    </div>
     <div class="subtitle">Sistema de Registro y Agendamiento de Citas</div>
 
-    <!-- PANTALLA 1: INICIO -->
-    <div id="view-home" class="view active">
+    <!-- PANTALLA 0: LOGIN -->
+    <div id="view-login" class="view active">
+        <div class="login-box">
+            <h3 style="text-align: center; color: var(--primary-color); margin-top: 0;">Iniciar Sesión</h3>
+            <div class="form-group">
+                <label for="loginUser">Usuario</label>
+                <input type="text" id="loginUser" placeholder="Ingrese usuario">
+            </div>
+            <div class="form-group">
+                <label for="loginPin">PIN</label>
+                <input type="password" id="loginPin" maxlength="6" placeholder="Ingrese PIN">
+            </div>
+            <button type="button" class="menu-btn btn-agendar" style="width: 100%; font-size: 16px; padding: 12px;" onclick="verificarLogin()">Ingresar</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 1: INICIO (MENÚ) -->
+    <div id="view-home" class="view">
         <div class="home-menu">
             <p style="text-align: center; color: #555; font-size: 16px;">Seleccione una opción para comenzar:</p>
             <button class="menu-btn btn-agendar" onclick="cambiarVista('form')">📅 Agendar Cita</button>
             <button class="menu-btn btn-ver" onclick="cambiarVista('list'); cargarCitas();">📋 Ver Citas Agendadas</button>
+            <button class="menu-btn btn-volver" style="background-color: #d90429; width: 80%; max-width: 400px;" onclick="cerrarSesion()">🔒 Cerrar Sesión</button>
         </div>
     </div>
 
@@ -499,9 +546,10 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL -->
+<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
+        <img src="icono.png" alt="Logo Santa Celia">
         <h2 style="margin:0; font-size: 18px;">CENTRO MÉDICO INTEGRAL SANTA CELIA</h2>
         <p style="margin: 5px 0 0 0; font-size: 13px;">Comprobante de Cita Médica</p>
     </div>
@@ -523,8 +571,27 @@
 <script>
     let globalCitasData = [];
 
+    // Verificación de Login
+    function verificarLogin() {
+        const usuarioInput = document.getElementById('loginUser').value.trim();
+        const pinInput = document.getElementById('loginPin').value.trim();
+
+        if (usuarioInput === "USER" && pinInput === "171819") {
+            cambiarVista('home');
+        } else {
+            alert("Usuario o PIN incorrectos. Por favor, intente nuevamente.");
+        }
+    }
+
+    function cerrarSesion() {
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPin').value = '';
+        cambiarVista('login');
+    }
+
     function cambiarVista(vista) {
         document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        if (vista === 'login') document.getElementById('view-login').classList.add('active');
         if (vista === 'home') document.getElementById('view-home').classList.add('active');
         if (vista === 'form') {
             document.getElementById('view-form').classList.add('active');
