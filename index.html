@@ -190,10 +190,12 @@
                 <input type="text" id="citaId" readonly>
             </div>
 
-            <!-- Fecha y Hora -->
+            <!-- Fecha y Hora Separadas (Ocultas para envío pero visibles o manejadas por detrás) -->
             <div class="form-group">
-                <label for="fechaHora">Fecha y Hora</label>
-                <input type="text" id="fechaHora" readonly>
+                <label for="fechaHoraVisual">Fecha y Hora</label>
+                <input type="text" id="fechaHoraVisual" readonly>
+                <input type="hidden" id="fechaVal">
+                <input type="hidden" id="horaVal">
             </div>
 
             <!-- Área -->
@@ -230,7 +232,7 @@
                     <div class="service-container">
                         <select id="servicio" required onchange="cargarPrecioAutomatico()">
                             <option value="" disabled selected>Seleccione o busque un servicio...</option>
-                            <!-- Tarifario extraído de la imagen oficial[cite: 2] -->
+                            <!-- Tarifario oficial de la imagen[cite: 2] -->
                             <option value="HEMOGRAMA COMPLETO" data-precio="30">1. HEMOGRAMA COMPLETO - S/ 30</option>
                             <option value="GLUCOSA" data-precio="10">2. GLUCOSA - S/ 10</option>
                             <option value="COLESTEROL" data-precio="10">3. COLESTEROL - S/ 10</option>
@@ -286,7 +288,7 @@
                         <button type="button" class="search-btn" onclick="buscarServicio()">🔍 Buscar</button>
                     </div>
                     <div>
-                        <input type="text" id="precioServicio" placeholder="Precio S/" required>
+                        <input type="text" id="precioServicio" placeholder="Costo S/" required>
                     </div>
                 </div>
             </div>
@@ -314,14 +316,18 @@
 </div>
 
 <script>
-    // Generar ID único automático y fecha/hora actual al cargar
+    // Generar ID único automático y fecha/hora separada al cargar
     window.onload = function() {
         const randomId = 'SC-' + Math.floor(100000 + Math.random() * 900000);
         document.getElementById('citaId').value = randomId;
 
         const ahora = new Date();
-        const fechaFormateada = ahora.toLocaleDateString() + ' ' + ahora.toLocaleTimeString();
-        document.getElementById('fechaHora').value = fechaFormateada;
+        const fechaStr = ahora.toLocaleDateString();
+        const horaStr = ahora.toLocaleTimeString();
+
+        document.getElementById('fechaHoraVisual').value = fechaStr + ' ' + horaStr;
+        document.getElementById('fechaVal').value = fechaStr;
+        document.getElementById('horaVal').value = horaStr;
     };
 
     // Cargar automáticamente el precio en el campo editable al seleccionar un servicio
@@ -330,7 +336,7 @@
         const optionSeleccionada = select.options[select.selectedIndex];
         const precio = optionSeleccionada.getAttribute('data-precio');
         if (precio) {
-            document.getElementById('precioServicio').value = "S/ " + precio;
+            document.getElementById('precioServicio').value = precio;
         }
     }
 
@@ -348,7 +354,7 @@
             if (opciones[i].text.toLowerCase().includes(termino)) {
                 select.selectedIndex = i;
                 encontrado = true;
-                cargarPrecioAutomatico(); // Carga el precio del servicio encontrado
+                cargarPrecioAutomatico();
                 break;
             }
         }
@@ -364,23 +370,22 @@
         document.getElementById('print-area').innerText = areaSelect;
     }
 
-    // Envío de datos a Google Sheets usando tu URL de Apps Script
+    // URL de tu Apps Script
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const servicioNombre = document.getElementById('servicio').value;
-        const precioFinal = document.getElementById('precioServicio').value;
-
         const datos = {
             id: document.getElementById('citaId').value,
-            fechaHora: document.getElementById('fechaHora').value,
+            fecha: document.getElementById('fechaVal').value,
+            hora: document.getElementById('horaVal').value,
             area: document.getElementById('area').value,
-            nombre: document.getElementById('nombrePaciente').value,
-            dni: document.getElementById('dniPaciente').value,
+            paciente: document.getElementById('nombrePaciente').value,
             edad: document.getElementById('edadPaciente').value,
-            servicio: servicioNombre + " (" + precioFinal + ")",
+            dni: document.getElementById('dniPaciente').value,
+            servicio: document.getElementById('servicio').value,
+            costo: document.getElementById('precioServicio').value,
             observaciones: document.getElementById('observaciones').value
         };
 
@@ -397,7 +402,7 @@
         .then(() => {
             alert("¡Cita registrada y guardada en Google Sheets con éxito!");
             document.getElementById('appointmentForm').reset();
-            location.reload(); // Recarga para generar nuevo ID
+            location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
