@@ -254,21 +254,35 @@
         }
         .clear-search:hover { color: var(--primary-color); }
 
-        /* Botón de impresión en tabla */
+        /* Botones de acción en tabla */
+        .table-actions-container {
+            display: flex;
+            gap: 6px;
+        }
+
         .print-row-btn {
             background-color: #495057;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
         .print-row-btn:hover { background-color: #343a40; }
+
+        .cancel-row-btn {
+            background-color: #d90429;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .cancel-row-btn:hover { background-color: #9b2226; }
 
         /* Tabla de Citas Estilo Tarjeta Responsiva */
         .table-container {
@@ -299,7 +313,7 @@
             color: var(--primary-color);
         }
 
-        /* Estructura para impresión individual de comprobante con Logo */
+        /* Estructura para impresión individual de comprobante con Logo y Datos Oficiales */
         .print-ticket {
             display: none;
         }
@@ -316,7 +330,7 @@
             .ticket-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
             .ticket-header img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
             .ticket-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
-            .ticket-footer { margin-top: 30px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; font-size: 12px; }
+            .ticket-footer { margin-top: 30px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; font-size: 12px; line-height: 1.5; }
         }
 
         /* Diseño adaptable para móviles (Tarjetas) */
@@ -546,7 +560,7 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO -->
+<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO Y DIRECCIÓN/TELÉFONO -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
         <img src="icono.png" alt="Logo Santa Celia">
@@ -563,7 +577,8 @@
     <div class="ticket-row"><strong>Costo:</strong> <span id="t-costo"></span></div>
     <div class="ticket-row"><strong>Observaciones:</strong> <span id="t-obs"></span></div>
     <div class="ticket-footer">
-        Dirección: [Actualizar Dirección] | Teléfono: [Actualizar Teléfono]<br>
+        Dirección: Av. SAN JUAN N. 928 - SANTA CELIA<br>
+        Teléfono: 949756065<br>
         ¡Gracias por confiar en nosotros!
     </div>
 </div>
@@ -737,23 +752,28 @@
                             <th>Paciente</th>
                             <th>DNI</th>
                             <th>Servicio / Costo</th>
-                            <th>Acción</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
             `;
 
             globalCitasData.forEach((fila, index) => {
+                let servicioLimpio = fila.servicio ? fila.servicio.split('-')[0].trim() : '';
+
                 html += `
-                    <tr>
+                    <tr id="row-${index}">
                         <td data-label="ID">${fila.id || ''}</td>
                         <td data-label="Fecha/Hora">${fila.fecha || ''} ${fila.hora || ''}</td>
                         <td data-label="Área">${fila.area || ''}</td>
                         <td data-label="Paciente">${fila.paciente || ''} (Edad: ${fila.edad || ''})</td>
                         <td data-label="DNI">${fila.dni || ''}</td>
-                        <td data-label="Servicio">${fila.servicio || ''} - <strong>S/ ${fila.costo || ''}</strong></td>
-                        <td data-label="Acción">
-                            <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️ Imprimir</button>
+                        <td data-label="Servicio">${servicioLimpio} <br><strong style="color: #0077b6;">S/ ${fila.costo || ''}</strong></td>
+                        <td data-label="Acciones">
+                            <div class="table-actions-container">
+                                <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️ Imprimir</button>
+                                <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar</button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -781,6 +801,20 @@
         document.getElementById('t-obs').innerText = c.observaciones || 'Ninguna';
 
         window.print();
+    }
+
+    function cancelarCita(index) {
+        const c = globalCitasData[index];
+        const confirmacion = confirm(`¿Está seguro que desea cancelar la cita con ID: ${c.id} para el paciente ${c.paciente}?`);
+        
+        if (confirmacion) {
+            // Eliminamos visualmente la fila de la tabla
+            const row = document.getElementById(`row-${index}`);
+            if (row) {
+                row.remove();
+                alert("La cita ha sido cancelada correctamente.");
+            }
+        }
     }
 </script>
 
