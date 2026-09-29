@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro Médico Integral Santa Celia - Registro de Citas</title>
+    <style>
+        :root {
+            --primary-color: #0077b6;
+            --secondary-color: #0096c7;
+            --light-bg: #f8f9fa;
+            --border-color: #ced4da;
+            --readonly-bg: #e9ecef;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        /* Campos no editables en gris */
+        input:read-only, select:disabled {
+            background-color: var(--readonly-bg);
+            color: #495057;
+            cursor: not-allowed;
+        }
+
+        .service-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button.action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        #btn-save {
+            background-color: #2b9348;
+            color: white;
+        }
+
+        #btn-print {
+            background-color: #495057;
+            color: white;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Estilos exclusivos para impresión */
+        .print-footer {
+            display: none;
+            margin-top: 40px;
+            border-top: 2px dashed #333;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .actions, .search-btn {
+                display: none !important;
+            }
+            input, select, textarea {
+                border: none;
+                border-bottom: 1px solid #333;
+                border-radius: 0;
+                padding: 5px 0;
+                background: transparent !important;
+            }
+            .print-footer {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="header-title">Centro Médico Integral Santa Celia</h2>
+    <div class="subtitle">Sistema de Registro y Agendamiento de Citas</div>
+
+    <form id="appointmentForm">
+        <div class="form-grid">
+            <!-- ID Automático -->
+            <div class="form-group">
+                <label for="citaId">ID de Cita (Automático)</label>
+                <input type="text" id="citaId" readonly>
+            </div>
+
+            <!-- Fecha y Hora -->
+            <div class="form-group">
+                <label for="fechaHora">Fecha y Hora</label>
+                <input type="text" id="fechaHora" readonly>
+            </div>
+
+            <!-- Área -->
+            <div class="form-group full-width">
+                <label for="area">Área Médica</label>
+                <select id="area" required onchange="actualizarPiePagina()">
+                    <option value="" disabled selected>Seleccione un área...</option>
+                    <option value="MEDICINA GENERAL">MEDICINA GENERAL</option>
+                    <option value="ODONTOLOGIA">ODONTOLOGIA</option>
+                    <option value="LABORATORIO">LABORATORIO</option>
+                </select>
+            </div>
+
+            <!-- Datos del Paciente -->
+            <div class="form-group full-width">
+                <label for="nombrePaciente">Nombre del Paciente</label>
+                <input type="text" id="nombrePaciente" placeholder="Apellidos y Nombres" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dniPaciente">DNI</label>
+                <input type="text" id="dniPaciente" maxlength="8" placeholder="Ingrese DNI" required>
+            </div>
+
+            <div class="form-group">
+                <label for="edadPaciente">Edad</label>
+                <input type="number" id="edadPaciente" placeholder="Edad en años" required>
+            </div>
+
+            <!-- Servicio y Tarifario con buscador -->
+            <div class="form-group full-width">
+                <label for="servicio">Servicio / Examen (Tarifario)</label>
+                <div class="service-container">
+                    <select id="servicio" required>
+                        <option value="" disabled selected>Seleccione o busque un servicio...</option>
+                        <!-- Tarifario extraído de la imagen oficial[cite: 2] -->
+                        <option value="HEMOGRAMA COMPLETO - S/ 30">1. HEMOGRAMA COMPLETO - S/ 30</option>
+                        <option value="GLUCOSA - S/ 10">2. GLUCOSA - S/ 10</option>
+                        <option value="COLESTEROL - S/ 10">3. COLESTEROL - S/ 10</option>
+                        <option value="TRIGRICELIDOS - S/ 10">4. TRIGRICELIDOS - S/ 10</option>
+                        <option value="UREA - S/ 10">5. UREA - S/ 10</option>
+                        <option value="CREATININA - S/ 10">6. CREATININA - S/ 10</option>
+                        <option value="ACIDO URICO - S/ 20">7. ACIDO URICO - S/ 20</option>
+                        <option value="BILIRRUBINA TOTAL, DIRECTA Y INDIRECTA - S/ 30">8. BILIRRUBINA TOTAL, DIRECTA Y INDIRECTA - S/ 30</option>
+                        <option value="TGO - S/ 10">9. TGO - S/ 10</option>
+                        <option value="TGP - S/ 10">10. TGP - S/ 10</option>
+                        <option value="FOSFATASA ALALINA SIMPLE - S/ 10">11. FOSFATASA ALALINA SIMPLE - S/ 10</option>
+                        <option value="PROTEINAS TOTALES - S/ 10">12. PROTEINAS TOTALES - S/ 10</option>
+                        <option value="ALBUMINA - S/ 10">13. ALBUMINA - S/ 10</option>
+                        <option value="GLOBULINA - S/ 10">14. GLOBULINA - S/ 10</option>
+                        <option value="EXAMEN DE HECES SIMPLE - S/ 10">15. EXAMEN DE HECES SIMPLE - S/ 10</option>
+                        <option value="COPROOLOGICO FUNCIONAL - S/ 40">16. COPROOLOGICO FUNCIONAL - S/ 40</option>
+                        <option value="EXAMEN SERIADO DE HECES - S/ 20">17. EXAMEN SERIADO DE HECES - S/ 20</option>
+                        <option value="TEST DE GRAHAM - S/ 15">18. TEST DE GRAHAM - S/ 15</option>
+                        <option value="REACCION INFLAMATORIA - S/ 20">19. REACCION INFLAMATORIA - S/ 20</option>
+                        <option value="EXAMEN COMPLETO DE HORINA - S/ 10">20. EXAMEN COMPLETO DE HORINA - S/ 10</option>
+                        <option value="UROCULTIVO - S/ 50">21. UROCULTIVO - S/ 50</option>
+                        <option value="DESCARTE DE EMBARAZO ( CUALITATIVO) - S/ 20">22. DESCARTE DE EMBARAZO ( CUALITATIVO) - S/ 20</option>
+                        <option value="DESCARTE DE EMBARAZO ( CUANTITATIVO) - S/ 50">23. DESCARTE DE EMBARAZO ( CUANTITATIVO) - S/ 50</option>
+                        <option value="PCR CUALITATIVO - S/ 20">24. PCR CUALITATIVO - S/ 20</option>
+                        <option value="PCR CUANTITATIVO - S/ 50">25. PCR CUANTITATIVO - S/ 50</option>
+                        <option value="FACTOR REMATOIDEO - S/ 20">26. FACTOR REMATOIDEO - S/ 20</option>
+                        <option value="ACLUTINACIONES - S/ 20">27. ACLUTINACIONES - S/ 20</option>
+                        <option value="HEMOGLOBINA - S/ 10">28. HEMOGLOBINA - S/ 10</option>
+                        <option value="GRUPO Y FACTOR ABO - S/ 15">29. GRUPO Y FACTOR ABO - S/ 15</option>
+                        <option value="PRUEBA DE HELICOBACTER PYLORI - S/ 30">30. PRUEBA DE HELICOBACTER PYLORI - S/ 30</option>
+                        <option value="DUAL VIH SIFILIS - S/ 50">31. DUAL VIH SIFILIS - S/ 50</option>
+                        <option value="DESCARTE DE VIH - S/ 30">32. DESCARTE DE VIH - S/ 30</option>
+                        <option value="DESCRATE DE SIFILIS - S/ 30">33. DESCRATE DE SIFILIS - S/ 30</option>
+                        <option value="HEPATITIS A - S/ 30">34. HEPATITIS A - S/ 30</option>
+                        <option value="HEBATTITIS B - S/ 30">35. HEBATTITIS B - S/ 30</option>
+                        <option value="HEPATITIS C - S/ 30">36. HEPATITIS C - S/ 30</option>
+                        <option value="TP Y IMR - S/ 30">37. TP Y IMR - S/ 30</option>
+                        <option value="TP-IMR-TTPA - S/ 50">38. TP-IMR-TTPA - S/ 50</option>
+                        <option value="HEMOGLOBINA GLICOSILADA - S/ 50">39. HEMOGLOBINA GLICOSILADA - S/ 50</option>
+                        <option value="TOLERANCIA A LA GLUCOSA - S/ 40">40. TOLERANCIA A LA GLUCOSA - S/ 40</option>
+                        <option value="TIEMPO SANGRIA Y TIEMPO DE GOAGULACION - S/ 10">41. TIEMPO SANGRIA Y TIEMPO DE GOAGULACION - S/ 10</option>
+                        <option value="BK ESPUTO - S/ 20">42. BK ESPUTO - S/ 20</option>
+                        <option value="SECRECION VAGINAL - S/ 20">43. SECRECION VAGINAL - S/ 20</option>
+                        <option value="CULTIVO DE SECRECION VAGINAL - S/ 50">44. CULTIVO DE SECRECION VAGINAL - S/ 50</option>
+                        <option value="SECRECION DE GLANDE - S/ 20">45. SECRECION DE GLANDE - S/ 20</option>
+                        <option value="SECRECION DE PIEL - S/ 20">46. SECRECION DE PIEL - S/ 20</option>
+                        <option value="TEST DE HELECHO - S/ 20">47. TEST DE HELECHO - S/ 20</option>
+                        <option value="CERTIFICADO DE SALUBRIDA - S/ 20">48. CERTIFICADO DE SALUBRIDA - S/ 20</option>
+                        <option value="AGA Y ELECTROLITOS - S/ 120">49. AGA Y ELECTROLITOS - S/ 120</option>
+                        <option value="LAMINA PERIFERICA - S/ 50">50. LAMINA PERIFERICA - S/ 50</option>
+                        <option value="GOTA GRUESA Y BARTONELIA - S/ 20">51. GOTA GRUESA Y BARTONELIA - S/ 20</option>
+                    </select>
+                    <button type="button" class="search-btn" onclick="buscarServicio()">🔍 Buscar</button>
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="form-group full-width">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" rows="3" placeholder="Detalles adicionales de la cita..."></textarea>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="actions">
+            <button type="submit" id="btn-save" class="action-btn">Guardar en Google Sheets</button>
+            <button type="button" id="btn-print" class="action-btn" onclick="window.print()">Imprimir Comprobante</button>
+        </div>
+    </form>
+
+    <!-- Pie de página para impresión -->
+    <div class="print-footer">
+        <strong style="font-size: 15px;">CENTRO MÉDICO INTEGRAL SANTA CELIA</strong><br>
+        Área: <span id="print-area">--------------------</span><br>
+        Dirección: [Actualizar Dirección] | Teléfono: [Actualizar Teléfono]
+    </div>
+</div>
+
+<script>
+    // Generar ID único automático y fecha/hora actual al cargar
+    window.onload = function() {
+        const randomId = 'SC-' + Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('citaId').value = randomId;
+
+        const ahora = new Date();
+        const fechaFormateada = ahora.toLocaleDateString() + ' ' + ahora.toLocaleTimeString();
+        document.getElementById('fechaHora').value = fechaFormateada;
+    };
+
+    // Función de búsqueda rápida para el tarifario
+    function buscarServicio() {
+        let termino = prompt("Ingrese el nombre del examen o servicio que desea buscar:");
+        if (!termino) return;
+        
+        termino = termino.toLowerCase();
+        let select = document.getElementById('servicio');
+        let opciones = select.options;
+        let encontrado = false;
+
+        for (let i = 0; i < opciones.length; i++) {
+            if (opciones[i].text.toLowerCase().includes(termino)) {
+                select.selectedIndex = i;
+                encontrado = true;
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            alert("No se encontró ningún servicio con ese nombre en el tarifario.");
+        }
+    }
+
+    // Actualizar el área en el pie de página de impresión
+    function actualizarPiePagina() {
+        const areaSelect = document.getElementById('area').value;
+        document.getElementById('print-area').innerText = areaSelect;
+    }
+
+    // Envío de datos a Google Sheets (Reemplazar la URL por tu Web App de Apps Script)
+    const URL_APPS_SCRIPT = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const datos = {
+            id: document.getElementById('citaId').value,
+            fechaHora: document.getElementById('fechaHora').value,
+            area: document.getElementById('area').value,
+            nombre: document.getElementById('nombrePaciente').value,
+            dni: document.getElementById('dniPaciente').value,
+            edad: document.getElementById('edadPaciente').value,
+            servicio: document.getElementById('servicio').value,
+            observaciones: document.getElementById('observaciones').value
+        };
+
+        const btnSave = document.getElementById('btn-save');
+        btnSave.innerText = "Guardando...";
+        btnSave.disabled = true;
+
+        fetch(URL_APPS_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        })
+        .then(() => {
+            alert("¡Cita registrada y guardada en Google Sheets con éxito!");
+            document.getElementById('appointmentForm').reset();
+            location.reload(); // Recarga para generar nuevo ID
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Hubo un error al guardar los datos.");
+            btnSave.innerText = "Guardar en Google Sheets";
+            btnSave.disabled = false;
+        });
+    });
+</script>
+
+</body>
+</html>
