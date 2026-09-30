@@ -43,7 +43,6 @@
             box-sizing: border-box;
         }
 
-        /* Estilos del Logo y Título Superior */
         .brand-header {
             display: flex;
             align-items: center;
@@ -73,7 +72,6 @@
             margin-bottom: 25px;
         }
 
-        /* Vistas / Pantallas */
         .view {
             display: none;
         }
@@ -82,7 +80,6 @@
             display: block;
         }
 
-        /* Pantalla de Login con Logo Grande */
         .login-box {
             max-width: 350px;
             margin: 20px auto;
@@ -99,7 +96,6 @@
             margin-bottom: 5px;
         }
 
-        /* Pantalla de Inicio (Home) */
         .home-menu {
             display: flex;
             flex-direction: column;
@@ -133,7 +129,6 @@
         .btn-ver { background-color: var(--primary-color); }
         .btn-volver { background-color: #6c757d; width: auto; padding: 8px 15px; font-size: 14px; margin-bottom: 15px; }
 
-        /* Estilos del Formulario */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -192,7 +187,6 @@
             background-color: #005f73;
         }
 
-        /* Botón Actualizar Mejorado */
         .refresh-modern-btn {
             background-color: #0077b6;
             color: white;
@@ -210,9 +204,6 @@
         }
         .refresh-modern-btn:hover {
             background-color: #005f73;
-        }
-        .refresh-modern-btn:active {
-            transform: scale(0.97);
         }
 
         .service-row {
@@ -242,7 +233,6 @@
 
         button.action-btn:hover { opacity: 0.9; }
 
-        /* === BARRA DE BÚSQUEDA === */
         .search-container {
             width: 100%;
             position: relative;
@@ -285,7 +275,6 @@
         }
         .clear-search:hover { color: var(--primary-color); }
 
-        /* Botones de acción en tabla */
         .table-actions-container {
             display: flex;
             gap: 6px;
@@ -315,7 +304,6 @@
         }
         .cancel-row-btn:hover { background-color: #9b2226; }
 
-        /* Tabla de Citas Estilo Tarjeta Responsiva */
         .table-container {
             width: 100%;
             margin-top: 10px;
@@ -344,7 +332,6 @@
             color: var(--primary-color);
         }
 
-        /* Estructura para impresión individual de comprobante con Logo Grande */
         .print-ticket {
             display: none;
         }
@@ -364,7 +351,6 @@
             .ticket-footer { margin-top: 30px; border-top: 1px dashed #000; padding-top: 10px; text-align: center; font-size: 12px; line-height: 1.5; }
         }
 
-        /* Diseño adaptable para móviles (Tarjetas) */
         @media (max-width: 768px) {
             table, thead, tbody, th, td, tr {
                 display: block;
@@ -409,14 +395,13 @@
 <body>
 
 <div class="container">
-    <!-- LOGO Y TÍTULO GENERAL (Solo visible al estar logueado) -->
     <div id="mainBrandHeader" class="brand-header" style="display: none;">
         <img src="icono.png" alt="Logo Santa Celia">
         <h2 class="header-title">Centro Médico Integral Santa Celia</h2>
     </div>
     <div id="mainSubtitle" class="subtitle" style="display: none;">Sistema de Registro y Agendamiento de Citas</div>
 
-    <!-- PANTALLA 0: LOGIN CON LOGO GRANDE Y SIN LOGO PEQUEÑO -->
+    <!-- PANTALLA 0: LOGIN -->
     <div id="view-login" class="view active">
         <div class="login-box">
             <img src="icono.png" alt="Logo Santa Celia Login" class="login-logo">
@@ -455,10 +440,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="fechaHoraVisual">Fecha y Hora</label>
-                    <input type="text" id="fechaHoraVisual" readonly>
-                    <input type="hidden" id="fechaVal">
-                    <input type="hidden" id="horaVal">
+                    <label for="fechaHoraRegistroVisual">Fecha y Hora de Registro</label>
+                    <input type="text" id="fechaHoraRegistroVisual" readonly>
+                    <input type="hidden" id="fechaRegVal">
+                    <input type="hidden" id="horaRegVal">
                 </div>
 
                 <div class="form-group full-width">
@@ -484,6 +469,17 @@
                 <div class="form-group">
                     <label for="edadPaciente">Edad</label>
                     <input type="number" id="edadPaciente" placeholder="Edad en años" required>
+                </div>
+
+                <!-- NUEVOS CAMPOS: FECHA Y HORA DE LA CITA -->
+                <div class="form-group">
+                    <label for="fechaCita">Fecha de la Cita</label>
+                    <input type="date" id="fechaCita" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horaCita">Hora de la Cita</label>
+                    <input type="time" id="horaCita" required>
                 </div>
 
                 <div class="form-group full-width">
@@ -576,7 +572,6 @@
             </button>
         </div>
 
-        <!-- BARRA DE BÚSQUEDA -->
         <div class="search-container">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -595,7 +590,7 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL CON LOGO GRANDE -->
+<!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
         <img src="icono.png" alt="Logo Santa Celia">
@@ -603,7 +598,8 @@
         <p style="margin: 5px 0 0 0; font-size: 13px;">Comprobante de Cita Médica</p>
     </div>
     <div class="ticket-row"><strong>ID de Cita:</strong> <span id="t-id"></span></div>
-    <div class="ticket-row"><strong>Fecha y Hora:</strong> <span id="t-fecha"></span></div>
+    <div class="ticket-row"><strong>Fecha de Cita:</strong> <span id="t-fechacita"></span></div>
+    <div class="ticket-row"><strong>Hora de Cita:</strong> <span id="t-horacita"></span></div>
     <div class="ticket-row"><strong>Área Médica:</strong> <span id="t-area"></span></div>
     <div class="ticket-row"><strong>Paciente:</strong> <span id="t-paciente"></span></div>
     <div class="ticket-row"><strong>DNI:</strong> <span id="t-dni"></span></div>
@@ -623,13 +619,11 @@
     let fechaActualGlobal = "";
     let horaActualGlobal = "";
 
-    // Lista de usuarios y PINs autorizados
     const usuariosPermitidos = {
         "MARTIN": "171819",
         "SONIA": "2026"
     };
 
-    // Verificación de Login
     function verificarLogin() {
         const usuarioInput = document.getElementById('loginUser').value.trim().toUpperCase();
         const pinInput = document.getElementById('loginPin').value.trim();
@@ -671,11 +665,17 @@
         fechaActualGlobal = `${d}/${m}/${y}`;
         horaActualGlobal = ahora.toLocaleTimeString();
 
-        document.getElementById('fechaHoraVisual').value = `${fechaActualGlobal} ${horaActualGlobal}`;
-        document.getElementById('fechaVal').value = fechaActualGlobal;
-        document.getElementById('horaVal').value = horaActualGlobal;
+        document.getElementById('fechaHoraRegistroVisual').value = `${fechaActualGlobal} ${horaActualGlobal}`;
+        document.getElementById('fechaRegVal').value = fechaActualGlobal;
+        document.getElementById('horaRegVal').value = horaActualGlobal;
         document.getElementById('area').selectedIndex = 0;
         document.getElementById('citaId').value = "SELECCIONE-AREA";
+        
+        // Poner fecha de hoy por defecto en la cita
+        const yyyy = ahora.getFullYear();
+        const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dd = String(ahora.getDate()).padStart(2, '0');
+        document.getElementById('fechaCita').value = `${yyyy}-${mm}-${dd}`;
     }
 
     function actualizarIdPorArea() {
@@ -750,7 +750,6 @@
         }
     }
 
-    // URL de tu Apps Script
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
@@ -758,14 +757,16 @@
 
         const datos = {
             id: document.getElementById('citaId').value,
-            fecha: document.getElementById('fechaVal').value,
-            hora: document.getElementById('horaVal').value,
+            fechaReg: document.getElementById('fechaRegVal').value,
+            horaReg: document.getElementById('horaRegVal').value,
             area: document.getElementById('area').value,
             paciente: document.getElementById('nombrePaciente').value,
             edad: document.getElementById('edadPaciente').value,
             dni: document.getElementById('dniPaciente').value,
             servicio: document.getElementById('servicio').value,
             costo: document.getElementById('precioServicio').value,
+            fechaCita: document.getElementById('fechaCita').value,
+            horaCita: document.getElementById('horaCita').value,
             observaciones: document.getElementById('observaciones').value
         };
 
@@ -813,7 +814,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Fecha / Hora</th>
+                            <th>F. Cita / Hora</th>
                             <th>Área</th>
                             <th>Paciente</th>
                             <th>DNI</th>
@@ -830,7 +831,7 @@
                 html += `
                     <tr id="row-${index}">
                         <td data-label="ID">${fila.id || ''}</td>
-                        <td data-label="Fecha/Hora">${fila.fecha || ''} ${fila.hora || ''}</td>
+                        <td data-label="Fecha/Hora Cita">${fila.fechaCita || ''} ${fila.horaCita || ''}</td>
                         <td data-label="Área">${fila.area || ''}</td>
                         <td data-label="Paciente">${fila.paciente || ''} (Edad: ${fila.edad || ''})</td>
                         <td data-label="DNI">${fila.dni || ''}</td>
@@ -857,7 +858,8 @@
     function imprimirCita(index) {
         const c = globalCitasData[index];
         document.getElementById('t-id').innerText = c.id || '';
-        document.getElementById('t-fecha').innerText = (c.fecha || '') + ' ' + (c.hora || '');
+        document.getElementById('t-fechacita').innerText = c.fechaCita || '';
+        document.getElementById('t-horacita').innerText = c.horaCita || '';
         document.getElementById('t-area').innerText = c.area || '';
         document.getElementById('t-paciente').innerText = c.paciente || '';
         document.getElementById('t-dni').innerText = c.dni || '';
