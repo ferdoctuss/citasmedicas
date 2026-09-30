@@ -32,9 +32,10 @@
             align-items: center;
         }
 
+        /* Caja principal ampliada a 1200px para que todo encaje perfecto */
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1200px;
             background: #ffffff;
             padding: 25px;
             border-radius: 12px;
@@ -306,12 +307,14 @@
         .table-container {
             width: 100%;
             margin-top: 10px;
+            overflow-x: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             background: white;
+            white-space: nowrap;
         }
         th, td {
             padding: 12px 15px;
@@ -356,6 +359,7 @@
             table, thead, tbody, th, td, tr {
                 display: block;
                 width: 100%;
+                white-space: normal;
             }
             thead tr {
                 position: absolute;
@@ -440,7 +444,6 @@
                     <input type="text" id="citaId" readonly>
                 </div>
 
-                <!-- LÍNEA ADICIONAL: ENCARGADO DE AGENDAR -->
                 <div class="form-group">
                     <label for="encargadoAgendar">Encargado de Agendar</label>
                     <input type="text" id="encargadoAgendar" readonly>
@@ -604,7 +607,7 @@
         <p style="margin: 3px 0 0 0; font-size: 11px;">Comprobante de Cita Médica</p>
     </div>
     <div class="ticket-row"><strong>ID:</strong> <span id="t-id"></span></div>
-    <div class="ticket-row"><strong>Encargado:</strong> <span id="t-encargado"></span></div>
+    <div class="ticket-row"><strong>Agendado por:</strong> <span id="t-encargado"></span></div>
     <div class="ticket-row"><strong>Fecha de Cita:</strong> <span id="t-fechacita"></span></div>
     <div class="ticket-row"><strong>Hora de Cita:</strong> <span id="t-horacita"></span></div>
     <div class="ticket-row"><strong>Área:</strong> <span id="t-area"></span></div>
@@ -633,6 +636,52 @@
         "MARTIN": "Martin Soberon Idrogo",
         "SONIA": "Sonia Barahona"
     };
+
+    // Funciones para limpiar y formatear fechas y horas de forma simple
+    function formatearFechaSimple(fechaStr) {
+        if (!fechaStr) return '';
+        // Si viene en formato yyyy-mm-dd (de input date)
+        if (fechaStr.includes('-') && fechaStr.length >= 10) {
+            let partes = fechaStr.substring(0, 10).split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+        }
+        // Si viene con zona horaria o formato largo de Google Sheets
+        let d = new Date(fechaStr);
+        if (!isNaN(d.getTime())) {
+            let dia = String(d.getDate()).padStart(2, '0');
+            let mes = String(d.getMonth() + 1).padStart(2, '0');
+            let anio = d.getFullYear();
+            return `${dia}/${mes}/${anio}`;
+        }
+        return fechaStr.substring(0, 10);
+    }
+
+    function formatearHoraSimple(horaStr) {
+        if (!horaStr) return '';
+        // Si viene en formato hh:mm (de input time)
+        if (horaStr.includes(':') && horaStr.length <= 5) {
+            let partes = horaStr.split(':');
+            let h = parseInt(partes[0]);
+            let m = partes[1];
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12;
+            return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
+        }
+        // Si es hora larga
+        let limpio = horaStr.replace('T', ' ').replace('Z', '');
+        if (limpiado = limpio.match(/(\d{2}):(\d{2})/)) {
+            let h = parseInt(limpiado[1]);
+            let m = limpiado[2];
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12;
+            return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
+        }
+        return horaStr;
+    }
 
     function verificarLogin() {
         const usuarioInput = document.getElementById('loginUser').value.trim().toUpperCase();
@@ -855,6 +904,7 @@
                             <th>Área</th>
                             <th>Paciente</th>
                             <th>DNI</th>
+                            <th>Agendado por</th>
                             <th>Servicio / Costo</th>
                             <th>Acciones</th>
                         </tr>
@@ -864,19 +914,22 @@
 
             globalCitasData.forEach((fila, index) => {
                 let servicioLimpio = fila.servicio ? fila.servicio.split('-')[0].trim() : '';
+                let fechaSimple = formatearFechaSimple(fila.fechaCita);
+                let horaSimple = formatearHoraSimple(fila.horaCita);
 
                 html += `
                     <tr id="row-${index}">
                         <td data-label="ID">${fila.id || ''}</td>
-                        <td data-label="Fecha de Cita">${fila.fechaCita || ''}</td>
-                        <td data-label="Hora de Cita">${fila.horaCita || ''}</td>
+                        <td data-label="Fecha de Cita">${fechaSimple}</td>
+                        <td data-label="Hora de Cita">${horaSimple}</td>
                         <td data-label="Área">${fila.area || ''}</td>
                         <td data-label="Paciente">${fila.paciente || ''} (Edad: ${fila.edad || ''})</td>
                         <td data-label="DNI">${fila.dni || ''}</td>
+                        <td data-label="Agendado por">${fila.encargado || ''}</td>
                         <td data-label="Servicio">${servicioLimpio} <br><strong style="color: #0077b6;">S/ ${fila.costo || ''}</strong></td>
                         <td data-label="Acciones">
                             <div class="table-actions-container">
-                                <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️ Imprimir</button>
+                                <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️️ Imprimir</button>
                                 <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar Cita</button>
                             </div>
                         </td>
@@ -897,8 +950,8 @@
         const c = globalCitasData[index];
         document.getElementById('t-id').innerText = c.id || '';
         document.getElementById('t-encargado').innerText = c.encargado || '';
-        document.getElementById('t-fechacita').innerText = c.fechaCita || '';
-        document.getElementById('t-horacita').innerText = c.horaCita || '';
+        document.getElementById('t-fechacita').innerText = formatearFechaSimple(c.fechaCita);
+        document.getElementById('t-horacita').innerText = formatearHoraSimple(c.horaCita);
         document.getElementById('t-area').innerText = c.area || '';
         document.getElementById('t-paciente').innerText = c.paciente || '';
         document.getElementById('t-dni').innerText = c.dni || '';
