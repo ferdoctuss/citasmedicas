@@ -26,18 +26,18 @@
             background-color: var(--page-bg);
             color: var(--text-color);
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Caja principal ampliada a 1200px para que todo encaje perfecto */
+        /* Contenedor ampliado para que abarque cómodamente toda la pantalla sin barras */
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1350px;
             background: #ffffff;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             box-sizing: border-box;
@@ -277,17 +277,17 @@
 
         .table-actions-container {
             display: flex;
-            gap: 6px;
+            gap: 4px;
         }
 
         .print-row-btn {
             background-color: #495057;
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
         .print-row-btn:hover { background-color: #343a40; }
@@ -296,10 +296,10 @@
             background-color: #d90429;
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
         .cancel-row-btn:hover { background-color: #9b2226; }
@@ -307,17 +307,17 @@
         .table-container {
             width: 100%;
             margin-top: 10px;
-            overflow-x: auto;
+            overflow-x: hidden; /* Evita barras horizontales de desplazamiento */
         }
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             background: white;
-            white-space: nowrap;
+            font-size: 12px; /* Texto optimizado para que todo quepa a la vista */
         }
         th, td {
-            padding: 12px 15px;
+            padding: 10px 8px;
             border-bottom: 1px solid #ddd;
         }
         th {
@@ -359,7 +359,6 @@
             table, thead, tbody, th, td, tr {
                 display: block;
                 width: 100%;
-                white-space: normal;
             }
             thead tr {
                 position: absolute;
@@ -637,17 +636,14 @@
         "SONIA": "Sonia Barahona"
     };
 
-    // Funciones para limpiar y formatear fechas y horas de forma simple
     function formatearFechaSimple(fechaStr) {
         if (!fechaStr) return '';
-        // Si viene en formato yyyy-mm-dd (de input date)
         if (fechaStr.includes('-') && fechaStr.length >= 10) {
             let partes = fechaStr.substring(0, 10).split('-');
             if (partes.length === 3) {
                 return `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
         }
-        // Si viene con zona horaria o formato largo de Google Sheets
         let d = new Date(fechaStr);
         if (!isNaN(d.getTime())) {
             let dia = String(d.getDate()).padStart(2, '0');
@@ -660,7 +656,6 @@
 
     function formatearHoraSimple(horaStr) {
         if (!horaStr) return '';
-        // Si viene en formato hh:mm (de input time)
         if (horaStr.includes(':') && horaStr.length <= 5) {
             let partes = horaStr.split(':');
             let h = parseInt(partes[0]);
@@ -670,7 +665,6 @@
             h = h ? h : 12;
             return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
         }
-        // Si es hora larga
         let limpio = horaStr.replace('T', ' ').replace('Z', '');
         if (limpiado = limpio.match(/(\d{2}):(\d{2})/)) {
             let h = parseInt(limpiado[1]);
@@ -899,8 +893,8 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Fecha de Cita</th>
-                            <th>Hora de Cita</th>
+                            <th>F. Cita</th>
+                            <th>H. Cita</th>
                             <th>Área</th>
                             <th>Paciente</th>
                             <th>DNI</th>
@@ -920,17 +914,17 @@
                 html += `
                     <tr id="row-${index}">
                         <td data-label="ID">${fila.id || ''}</td>
-                        <td data-label="Fecha de Cita">${fechaSimple}</td>
-                        <td data-label="Hora de Cita">${horaSimple}</td>
+                        <td data-label="F. Cita">${fechaSimple}</td>
+                        <td data-label="H. Cita">${horaSimple}</td>
                         <td data-label="Área">${fila.area || ''}</td>
-                        <td data-label="Paciente">${fila.paciente || ''} (Edad: ${fila.edad || ''})</td>
+                        <td data-label="Paciente">${fila.paciente || ''} (${fila.edad || ''} a.)</td>
                         <td data-label="DNI">${fila.dni || ''}</td>
                         <td data-label="Agendado por">${fila.encargado || ''}</td>
                         <td data-label="Servicio">${servicioLimpio} <br><strong style="color: #0077b6;">S/ ${fila.costo || ''}</strong></td>
                         <td data-label="Acciones">
                             <div class="table-actions-container">
-                                <button class="print-row-btn" onclick="imprimirCita(${index})">🖨️️ Imprimir</button>
-                                <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar Cita</button>
+                                <button class="print-row-btn" onclick="imprimirCita(${index})">🖨 Imprimir</button>
+                                <button class="cancel-row-btn" onclick="cancelarCita(${index})">❌ Cancelar</button>
                             </div>
                         </td>
                     </tr>
