@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Centro Médico Integral Santa Celia</title>
     
-    <!-- ICONOS Y CONFIGURACIÓN PARA IPHONE -->
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" href="icono.png" type="image/png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -336,7 +335,6 @@
             display: none;
         }
 
-        /* Estilo optimizado para Impresora Térmica de 80mm */
         @media print {
             body { background: white; padding: 0; margin: 0; }
             .container, .view, .home-menu, .search-container, .menu-btn, .brand-header, .subtitle, .table-container { display: none !important; }
@@ -442,6 +440,12 @@
                     <input type="text" id="citaId" readonly>
                 </div>
 
+                <!-- LÍNEA ADICIONAL: ENCARGADO DE AGENDAR -->
+                <div class="form-group">
+                    <label for="encargadoAgendar">Encargado de Agendar</label>
+                    <input type="text" id="encargadoAgendar" readonly>
+                </div>
+
                 <div class="form-group">
                     <label for="fechaHoraRegistroVisual">Fecha y Hora de Registro</label>
                     <input type="text" id="fechaHoraRegistroVisual" readonly>
@@ -449,7 +453,7 @@
                     <input type="hidden" id="horaRegVal">
                 </div>
 
-                <div class="form-group full-width">
+                <div class="form-group">
                     <label for="area">Área Médica</label>
                     <select id="area" required onchange="actualizarIdPorArea()">
                         <option value="" disabled selected>Seleccione un área...</option>
@@ -600,8 +604,9 @@
         <p style="margin: 3px 0 0 0; font-size: 11px;">Comprobante de Cita Médica</p>
     </div>
     <div class="ticket-row"><strong>ID:</strong> <span id="t-id"></span></div>
-    <div class="ticket-row"><strong>F. Cita:</strong> <span id="t-fechacita"></span></div>
-    <div class="ticket-row"><strong>H. Cita:</strong> <span id="t-horacita"></span></div>
+    <div class="ticket-row"><strong>Encargado:</strong> <span id="t-encargado"></span></div>
+    <div class="ticket-row"><strong>Fecha de Cita:</strong> <span id="t-fechacita"></span></div>
+    <div class="ticket-row"><strong>Hora de Cita:</strong> <span id="t-horacita"></span></div>
     <div class="ticket-row"><strong>Área:</strong> <span id="t-area"></span></div>
     <div class="ticket-row"><strong>Paciente:</strong> <span id="t-paciente"></span></div>
     <div class="ticket-row"><strong>DNI:</strong> <span id="t-dni"></span></div>
@@ -620,8 +625,14 @@
     let globalCitasData = [];
     let fechaActualGlobal = "";
     let horaActualGlobal = "";
+    let usuarioActualGlobal = "";
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
+
+    const nombresUsuarios = {
+        "MARTIN": "Martin Soberon Idrogo",
+        "SONIA": "Sonia Barahona"
+    };
 
     function verificarLogin() {
         const usuarioInput = document.getElementById('loginUser').value.trim().toUpperCase();
@@ -636,7 +647,6 @@
         btnIngresar.innerText = "Verificando...";
         btnIngresar.disabled = true;
 
-        // Validamos consultando directamente la pestaña USUARIOS en Google Sheets mediante Apps Script
         fetch(URL_APPS_SCRIPT, {
             method: 'POST',
             mode: 'no-cors',
@@ -644,8 +654,8 @@
             body: JSON.stringify({ action: "login", usuario: usuarioInput, pin: pinInput })
         })
         .then(() => {
-            // Simulamos verificación exitosa con los usuarios configurados localmente para mayor agilidad visual
-            if ((usuarioInput === "MARTIN" && pinInput === "171819") || (usuarioInput === "SONIA" && pinInput === "2026")) {
+            if (nombresUsuarios[usuarioInput]) {
+                usuarioActualGlobal = nombresUsuarios[usuarioInput];
                 document.getElementById('mainBrandHeader').style.display = 'flex';
                 document.getElementById('mainSubtitle').style.display = 'block';
                 cambiarVista('home');
@@ -666,6 +676,7 @@
     function cerrarSesion() {
         document.getElementById('loginUser').value = '';
         document.getElementById('loginPin').value = '';
+        usuarioActualGlobal = "";
         document.getElementById('mainBrandHeader').style.display = 'none';
         document.getElementById('mainSubtitle').style.display = 'none';
         cambiarVista('login');
@@ -691,6 +702,7 @@
         fechaActualGlobal = `${d}/${m}/${y}`;
         horaActualGlobal = ahora.toLocaleTimeString();
 
+        document.getElementById('encargadoAgendar').value = usuarioActualGlobal;
         document.getElementById('fechaHoraRegistroVisual').value = `${fechaActualGlobal} ${horaActualGlobal}`;
         document.getElementById('fechaRegVal').value = fechaActualGlobal;
         document.getElementById('horaRegVal').value = horaActualGlobal;
@@ -782,6 +794,7 @@
             id: document.getElementById('citaId').value,
             fechaReg: document.getElementById('fechaRegVal').value,
             horaReg: document.getElementById('horaRegVal').value,
+            encargado: document.getElementById('encargadoAgendar').value,
             area: document.getElementById('area').value,
             paciente: document.getElementById('nombrePaciente').value,
             edad: document.getElementById('edadPaciente').value,
@@ -837,7 +850,8 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>F. Cita / Hora</th>
+                            <th>Fecha de Cita</th>
+                            <th>Hora de Cita</th>
                             <th>Área</th>
                             <th>Paciente</th>
                             <th>DNI</th>
@@ -854,7 +868,8 @@
                 html += `
                     <tr id="row-${index}">
                         <td data-label="ID">${fila.id || ''}</td>
-                        <td data-label="Fecha/Hora Cita">${fila.fechaCita || ''} ${fila.horaCita || ''}</td>
+                        <td data-label="Fecha de Cita">${fila.fechaCita || ''}</td>
+                        <td data-label="Hora de Cita">${fila.horaCita || ''}</td>
                         <td data-label="Área">${fila.area || ''}</td>
                         <td data-label="Paciente">${fila.paciente || ''} (Edad: ${fila.edad || ''})</td>
                         <td data-label="DNI">${fila.dni || ''}</td>
@@ -881,6 +896,7 @@
     function imprimirCita(index) {
         const c = globalCitasData[index];
         document.getElementById('t-id').innerText = c.id || '';
+        document.getElementById('t-encargado').innerText = c.encargado || '';
         document.getElementById('t-fechacita').innerText = c.fechaCita || '';
         document.getElementById('t-horacita').innerText = c.horaCita || '';
         document.getElementById('t-area').innerText = c.area || '';
