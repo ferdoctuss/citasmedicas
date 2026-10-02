@@ -37,7 +37,7 @@
             box-sizing: border-box;
         }
 
-        /* === PANTALLA DE LOGIN IDÉNTICA A CITAS === */
+        /* === PANTALLA DE LOGIN === */
         .login-box {
             max-width: 350px;
             margin: 40px auto;
@@ -300,7 +300,7 @@
 <body>
 
 <div class="container">
-    <!-- PANTALLA DE LOGIN IDÉNTICA A CITAS -->
+    <!-- PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-box">
             <h3 style="text-align: center; color: var(--primary-color); margin: 0 0 10px 0;">C.M.I. "Santa Celia"</h3>
@@ -394,7 +394,7 @@
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="searchInput" class="search-input" oninput="filtrarTarjetas()" placeholder="Buscar por paciente, DNI, diagnóstico...">
             </div>
-            <button class="print-btn" onclick="window.print()">🖨️️ Imprimir</button>
+            <button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
         </div>
         <button class="refresh-btn" onclick="cargarDatosHistorial()">Actualizar Registros</button>
 
@@ -406,11 +406,10 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwM9IydySU4dIsZibHJL3n6ejzrGt1WIdZZ5PfPw_3p1we1YT7KK6QbtIfd9AucXTQx/exec';
 
     let areaActual = "MEDICINA GENERAL";
     let registrosCache = [];
-    let idParaEliminar = null;
 
     function generarIdTemporal() {
         const ahora = new Date();
@@ -440,7 +439,6 @@
         document.getElementById('horaFinal').value = horaStr;
     }
 
-    // LOGIN IDÉNTICO AL DE LA APP DE CITAS
     async function verificarLogin() {
         const usuarioInput = document.getElementById('loginUser').value.trim().toUpperCase();
         const pinInput = document.getElementById('loginPin').value.trim();
@@ -557,8 +555,6 @@
         const contenedor = document.getElementById('cardsContainer');
         contenedor.innerHTML = '<div class="loading">Cargando registros...</div>';
 
-        // Nota: Como este visor lee de la pestaña activa según el área seleccionada, 
-        // usamos el endpoint de lectura general adaptado.
         fetch(scriptURL + "?action=leer&area=" + encodeURIComponent(areaActual))
         .then(response => response.json())
         .then(data => {
@@ -580,7 +576,7 @@
         const contenedor = document.getElementById('cardsContainer');
         contenedor.innerHTML = '';
 
-        lista.forEach((reg, index) => {
+        lista.forEach((reg) => {
             let card = document.createElement('div');
             card.className = 'record-card';
             card.innerHTML = `
