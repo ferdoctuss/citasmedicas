@@ -555,7 +555,7 @@
         const contenedor = document.getElementById('cardsContainer');
         contenedor.innerHTML = '<div class="loading">Cargando registros...</div>';
 
-        fetch(scriptURL + "?action=leer&area=" + encodeURIComponent(areaActual))
+        fetch(scriptURL + "?area=" + encodeURIComponent(areaActual))
         .then(response => response.json())
         .then(data => {
             if (!data || data.length === 0) {
@@ -633,7 +633,7 @@
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: "eliminar", id: id, area: areaActual })
+            body: JSON.stringify({ action: "delete", id: id, area: areaActual })
         })
         .then(() => {
             alert("Registro eliminado con éxito.");
