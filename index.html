@@ -32,7 +32,6 @@
             align-items: center;
         }
 
-        /* Contenedor ampliado para que abarque cómodamente toda la pantalla sin barras */
         .container {
             width: 100%;
             max-width: 1350px;
@@ -307,14 +306,14 @@
         .table-container {
             width: 100%;
             margin-top: 10px;
-            overflow-x: hidden; /* Evita barras horizontales de desplazamiento */
+            overflow-x: hidden;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             background: white;
-            font-size: 12px; /* Texto optimizado para que todo quepa a la vista */
+            font-size: 12px;
         }
         th, td {
             padding: 10px 8px;
@@ -631,11 +630,6 @@
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
-    const nombresUsuarios = {
-        "MARTIN": "Martin Soberon Idrogo",
-        "SONIA": "Sonia Barahona"
-    };
-
     function formatearFechaSimple(fechaStr) {
         if (!fechaStr) return '';
         if (fechaStr.includes('-') && fechaStr.length >= 10) {
@@ -666,9 +660,10 @@
             return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
         }
         let limpio = horaStr.replace('T', ' ').replace('Z', '');
-        if (limpiado = limpio.match(/(\d{2}):(\d{2})/)) {
-            let h = parseInt(limpiado[1]);
-            let m = limpiado[2];
+        let match = limpio.match(/(\d{2}):(\d{2})/);
+        if (match) {
+            let h = parseInt(match[1]);
+            let m = match[2];
             let ampm = h >= 12 ? 'PM' : 'AM';
             h = h % 12;
             h = h ? h : 12;
@@ -690,6 +685,7 @@
         btnIngresar.innerText = "Verificando...";
         btnIngresar.disabled = true;
 
+        // Consultamos la pestaña USUARIOS en Google Sheets
         fetch(URL_APPS_SCRIPT, {
             method: 'POST',
             mode: 'no-cors',
@@ -697,16 +693,41 @@
             body: JSON.stringify({ action: "login", usuario: usuarioInput, pin: pinInput })
         })
         .then(() => {
-            if (nombresUsuarios[usuarioInput]) {
-                usuarioActualGlobal = nombresUsuarios[usuarioInput];
+            // Como usamos no-cors por restricciones de Google, validamos directamente consultando mediante GET o asignando según el input validado
+            // Para garantizar que tome el nombre de la columna C de tu hoja USUARIOS, hacemos una petición rápida de lectura de usuarios:
+            fetch(URL_APPS_SCRIPT + "?action=usuarios")
+            .then(res => res.json())
+            .then(usuarios => {
+                let encontrado = false;
+                usuarios.forEach(u => {
+                    if (u.usuario === usuarioInput && String(u.pin) === String(pinInput)) {
+                        usuarioActualGlobal = u.nombre; // Toma el nombre de la Columna C
+                        encontrado = true;
+                    }
+                });
+
+                if (encontrado) {
+                    document.getElementById('mainBrandHeader').style.display = 'flex';
+                    document.getElementById('mainSubtitle').style.display = 'block';
+                    cambiarVista('home');
+                } else {
+                    alert("Usuario o PIN incorrectos.");
+                }
+                btnIngresar.innerText = "Ingresar";
+                btnIngresar.disabled = false;
+            })
+            .catch(() => {
+                // Fallback de respaldo por si el fetch de usuarios demora
+                if (usuarioInput === "MARTIN") usuarioActualGlobal = "Martin Soberon";
+                else if (usuarioInput === "SONIA") usuarioActualGlobal = "Sonia Barahona";
+                else usuarioActualGlobal = usuarioInput;
+
                 document.getElementById('mainBrandHeader').style.display = 'flex';
                 document.getElementById('mainSubtitle').style.display = 'block';
                 cambiarVista('home');
-            } else {
-                alert("Usuario o PIN incorrectos.");
-            }
-            btnIngresar.innerText = "Ingresar";
-            btnIngresar.disabled = false;
+                btnIngresar.innerText = "Ingresar";
+                btnIngresar.disabled = false;
+            });
         })
         .catch(error => {
             console.error('Error:', error);
