@@ -137,38 +137,39 @@
             cursor: not-allowed;
         }
 
-        .service-container {
-            display: flex;
-            gap: 8px;
+        /* ESTILOS PARA EL AUTOCOMPLETADO EN VIVO DE SERVICIOS */
+        .autocomplete-wrapper {
+            position: relative;
+            width: 100%;
         }
 
-        .search-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            white-space: nowrap;
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 99;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
         }
-        .search-btn:hover { background-color: #005f73; }
 
-        .refresh-modern-btn {
-            background-color: #0077b6;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+        .autocomplete-item {
+            padding: 10px;
             cursor: pointer;
-            font-weight: 600;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #f1f1f1;
         }
-        .refresh-modern-btn:hover { background-color: #005f73; }
+
+        .autocomplete-item:hover {
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
+        }
 
         .service-row {
             display: grid;
@@ -365,16 +366,14 @@
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="servicio">Servicio / Examen (Tarifario)</label>
+                    <label for="inputServicio">Servicio / Examen (Tarifario)</label>
                     <div class="service-row">
-                        <div class="service-container">
-                            <select id="servicio" required onchange="cargarPrecioAutomatico()">
-                                <option value="" disabled selected>Primero seleccione un área médica...</option>
-                            </select>
-                            <button type="button" class="search-btn" onclick="enfocarBusquedaServicio()">🔍 Buscar</button>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" id="inputServicio" placeholder="Escriba para buscar servicio en tiempo real..." autocomplete="off" oninput="filtrarServiciosEnVivo()" onfocus="mostrarListaServicios()" required>
+                            <div id="listaResultados" class="autocomplete-results"></div>
                         </div>
                         <div>
-                            <input type="text" id="precioServicio" placeholder="Costo S/" required>
+                            <input type="text" id="precioServicio" placeholder="Costo S/" required readonly>
                         </div>
                     </div>
                 </div>
@@ -450,7 +449,7 @@
     let fechaActualGlobal = "";
     let horaActualGlobal = "";
     let usuarioActualNombre = "";
-    let listaServiciosCache = []; // Almacena los servicios del área actual para filtrado rápido
+    let listaServiciosCache = [];
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
@@ -586,9 +585,10 @@
         document.getElementById('citaId').value = "SELECCIONE-AREA";
         
         listaServiciosCache = [];
-        const servicioSelect = document.getElementById('servicio');
-        servicioSelect.innerHTML = '<option value="" disabled selected>Primero seleccione un área médica...</option>';
+        document.getElementById('inputServicio').value = '';
+        document.getElementById('inputServicio').placeholder = "Primero seleccione un área médica...";
         document.getElementById('precioServicio').value = '';
+        document.getElementById('listaResultados').style.display = 'none';
 
         const yyyy = ahora.getFullYear();
         const mm = String(ahora.getMonth() + 1).padStart(2, '0');
@@ -599,55 +599,65 @@
     async function cambiarAreaMedica() {
         actualizarIdPorArea();
         const areaSelect = document.getElementById('area').value;
-        const servicioSelect = document.getElementById('servicio');
+        const inputServicio = document.getElementById('inputServicio');
         
-        servicioSelect.innerHTML = '<option value="" disabled selected>Cargando servicios de ' + areaSelect + '...</option>';
+        inputServicio.value = '';
+        inputServicio.placeholder = `Cargando servicios de ${areaSelect}...`;
         document.getElementById('precioServicio').value = '';
 
         try {
             const response = await fetch(URL_APPS_SCRIPT + `?action=tarifario&area=${encodeURIComponent(areaSelect)}`);
             listaServiciosCache = await response.json();
 
-            renderizarOpcionesServicios(listaServiciosCache);
+            inputServicio.placeholder = "Escriba para buscar servicio en tiempo real...";
         } catch (error) {
             console.error('Error al cargar tarifario:', error);
-            servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
+            inputServicio.placeholder = "Error al cargar servicios";
         }
     }
 
-    function renderizarOpcionesServicios(lista) {
-        const servicioSelect = document.getElementById('servicio');
-        servicioSelect.innerHTML = '<option value="" disabled selected>Seleccione o busque un servicio...</option>';
+    function mostrarListaServicios() {
+        if (listaServiciosCache.length > 0) {
+            filtrarServiciosEnVivo();
+        }
+    }
+
+    function filtrarServiciosEnVivo() {
+        const input = document.getElementById('inputServicio');
+        const filtro = input.value.toLowerCase().trim();
+        const contenedor = document.getElementById('listaResultados');
         
-        if (lista.length === 0) {
-            servicioSelect.innerHTML = '<option value="" disabled selected>No hay servicios registrados</option>';
+        contenedor.innerHTML = '';
+
+        const filtrados = listaServiciosCache.filter(item => item.servicio.toLowerCase().includes(filtro));
+
+        if (filtrados.length === 0) {
+            contenedor.style.display = 'none';
             return;
         }
 
-        lista.forEach((item, index) => {
-            let opt = document.createElement('option');
-            opt.value = item.servicio;
-            opt.setAttribute('data-precio', item.costo);
-            opt.textContent = `${index + 1}. ${item.servicio} (S/ ${item.costo})`;
-            servicioSelect.appendChild(opt);
+        filtrados.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.innerHTML = `<strong>${item.servicio}</strong> <span style="float: right; color: var(--primary-color);">S/ ${item.costo}</span>`;
+            div.onclick = function() {
+                input.value = item.servicio;
+                document.getElementById('precioServicio').value = item.costo;
+                contenedor.style.display = 'none';
+            };
+            contenedor.appendChild(div);
         });
+
+        contenedor.style.display = 'block';
     }
 
-    function enfocarBusquedaServicio() {
-        let termino = prompt("Escriba parte del nombre del servicio para filtrar la lista:");
-        if (termino === null) return;
-        
-        termino = termino.toLowerCase().trim();
-        const filtrados = listaServiciosCache.filter(item => item.servicio.toLowerCase().includes(termino));
-        
-        if (filtrados.length > 0) {
-            renderizarOpcionesServicios(filtrados);
-            document.getElementById('servicio').selectedIndex = 1; // Selecciona el primer resultado
-            cargarPrecioAutomatico();
-        } else {
-            alert("No se encontraron servicios con ese término.");
+    // Ocultar resultados si hace clic fuera
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.autocomplete-wrapper')) {
+            const contenedor = document.getElementById('listaResultados');
+            if (contenedor) contenedor.style.display = 'none';
         }
-    }
+    });
 
     function actualizarIdPorArea() {
         const areaSelect = document.getElementById('area').value;
@@ -663,15 +673,6 @@
 
         const idGenerado = `${sigla}-${fechaPartes}-${horaPartes}`;
         document.getElementById('citaId').value = idGenerado;
-    }
-
-    function cargarPrecioAutomatico() {
-        const select = document.getElementById('servicio');
-        const optionSeleccionada = select.options[select.selectedIndex];
-        const precio = optionSeleccionada.getAttribute('data-precio');
-        if (precio) {
-            document.getElementById('precioServicio').value = precio;
-        }
     }
 
     function limpiarBusqueda() {
@@ -701,6 +702,14 @@
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
+        const servicioInput = document.getElementById('inputServicio').value.trim();
+        const costoInput = document.getElementById('precioServicio').value.trim();
+
+        if (!servicioInput || !costoInput) {
+            alert("Por favor seleccione un servicio válido de la lista.");
+            return;
+        }
+
         const datos = {
             id: document.getElementById('citaId').value,
             fechaReg: document.getElementById('fechaRegVal').value,
@@ -710,8 +719,8 @@
             paciente: document.getElementById('nombrePaciente').value,
             edad: document.getElementById('edadPaciente').value,
             dni: document.getElementById('dniPaciente').value,
-            servicio: document.getElementById('servicio').value,
-            costo: document.getElementById('precioServicio').value,
+            servicio: servicioInput,
+            costo: costoInput,
             fechaCita: document.getElementById('fechaCita').value,
             horaCita: document.getElementById('horaCita').value,
             observaciones: document.getElementById('observaciones').value
