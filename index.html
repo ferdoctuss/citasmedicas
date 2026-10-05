@@ -526,24 +526,25 @@
         if (!horaStr) return '';
         let horaLimpia = String(horaStr).trim();
 
-        if (horaLimpia.includes('T') && horaLimpia.includes('Z')) {
-            try {
+        // Extrae las horas y minutos limpiamente ignorando la fecha base de Google Sheets
+        let match = horaLimpia.match(/(\d{2}):(\d{2}):(\d{2})/);
+        if (!match) {
+            match = horaLimpia.match(/(\d{2}):(\d{2})/);
+        }
+
+        if (match) {
+            if (horaLimpia.includes('T')) {
                 let d = new Date(horaLimpia);
                 if (!isNaN(d.getTime())) {
-                    let h = d.getUTCHours();
-                    let m = d.getUTCMinutes();
+                    let h = d.getHours();
+                    let m = d.getMinutes();
                     let ampm = h >= 12 ? 'PM' : 'AM';
                     h = h % 12;
                     h = h ? h : 12;
                     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
                 }
-            } catch (e) {
-                console.error("Error al formatear hora ISO:", e);
             }
-        }
 
-        let match = horaLimpia.match(/(\d{2}):(\d{2})/);
-        if (match) {
             let h = parseInt(match[1]);
             let m = match[2];
             let ampm = h >= 12 ? 'PM' : 'AM';
