@@ -13,7 +13,6 @@
             --text-color: #333333;
             --page-bg: #f4f7f6;
             --border-color: #ced4da;
-            --readonly-bg: #e9ecef;
         }
 
         body {
@@ -38,13 +37,19 @@
         }
 
         /* === PANTALLA DE LOGIN === */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+
         .login-box {
+            width: 100%;
             max-width: 350px;
-            margin: 40px auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            align-items: center;
             background: #fff;
             padding: 30px;
             border-radius: 12px;
@@ -303,16 +308,16 @@
     <!-- PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-box">
-            <h3 style="text-align: center; color: var(--primary-color); margin: 0 0 10px 0;">C.M.I. "Santa Celia"</h3>
+            <h3 style="text-align: center; color: var(--primary-color); margin: 0 0 5px 0;">C.M.I. "Santa Celia"</h3>
             <p style="text-align: center; color: #666; font-size: 13px; margin-top:0;">Historial Clínico</p>
             
             <div class="form-group">
                 <label for="loginUser">Usuario</label>
-                <input type="text" id="loginUser" placeholder="Ingrese usuario">
+                <input type="text" id="loginUser" placeholder="Ingrese usuario" autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="loginPin">PIN</label>
-                <input type="password" id="loginPin" maxlength="6" placeholder="Ingrese PIN">
+                <input type="password" id="loginPin" maxlength="6" placeholder="Ingrese PIN" autocomplete="off">
             </div>
             <button type="button" class="menu-btn" onclick="verificarLogin()">Ingresar</button>
             <div id="error-box" style="color: #dc3545; font-size: 0.85rem; display: none; text-align: center; font-weight: bold;">Usuario o PIN incorrectos.</div>
@@ -406,7 +411,7 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwM9IydySU4dIsZibHJL3n6ejzrGt1WIdZZ5PfPw_3p1we1YT7KK6QbtIfd9AucXTQx/exec';
+    const scriptURL = 'AQUÍ_VA_TU_URL_DE_APPS_SCRIPT'; // <-- REEMPLAZA CON TU URL DE APPS SCRIPT
 
     let areaActual = "MEDICINA GENERAL";
     let registrosCache = [];
@@ -637,7 +642,7 @@
         })
         .then(() => {
             alert("Registro eliminado con éxito.");
-            cargarDatosHistorial();
+            setTimeout(cargarDatosHistorial, 1000);
         })
         .catch(error => {
             console.error('Error al eliminar:', error);
