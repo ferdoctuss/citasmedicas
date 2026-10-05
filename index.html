@@ -41,7 +41,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 90vh;
+            height: 80vh;
         }
 
         .login-box {
@@ -342,7 +342,7 @@
 
         <!-- FORMULARIO DE REGISTRO CLÍNICO -->
         <div class="card-form">
-            <h3>Nuevo Registro Clínico</h3>
+            <h3>Nuevo Registro Clínico <span id="labelResponsable" style="font-size: 0.85rem; color: #666; font-weight: normal; float: right;"></span></h3>
             <form id="formRegistro" onsubmit="enviarDatos(event)">
                 <div class="form-grid">
                     <div class="form-group span-1">
@@ -411,9 +411,10 @@
 </div>
 
 <script>
-    const scriptURL = 'AQUÍ_VA_TU_URL_DE_APPS_SCRIPT'; // <-- REEMPLAZA CON TU URL DE APPS SCRIPT
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec';
 
     let areaActual = "MEDICINA GENERAL";
+    let usuarioActualNombre = "";
     let registrosCache = [];
 
     function generarIdTemporal() {
@@ -442,6 +443,10 @@
         
         document.getElementById('horaInicio').value = horaStr;
         document.getElementById('horaFinal').value = horaStr;
+        
+        if(usuarioActualNombre) {
+            document.getElementById('labelResponsable').textContent = `Registrado por: ${usuarioActualNombre}`;
+        }
     }
 
     async function verificarLogin() {
@@ -467,6 +472,7 @@
             usuarios.forEach(u => {
                 if (u.usuario.toUpperCase() === usuarioInput && String(u.pin) === String(pinInput)) {
                     encontrado = true;
+                    usuarioActualNombre = u.nombre || usuarioInput; // Guarda el nombre de la Columna C
                 }
             });
 
@@ -497,6 +503,7 @@
         document.getElementById('error-box').style.display = "none";
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
+        usuarioActualNombre = "";
     }
 
     function cambiarAreaTrabajo() {
@@ -526,7 +533,7 @@
             diagnostico: document.getElementById('diagnostico').value,
             medicamentos: document.getElementById('medicamentos').value,
             medico: document.getElementById('medico').value,
-            observaciones: document.getElementById('observaciones').value
+            observaciones: document.getElementById('observaciones').value + (usuarioActualNombre ? ` [Responsable: ${usuarioActualNombre}]` : '')
         };
 
         fetch(scriptURL, {
