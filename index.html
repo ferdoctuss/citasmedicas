@@ -331,7 +331,7 @@
 
                 <div class="form-group">
                     <label for="area">Área Médica</label>
-                    <select id="area" required onchange="actualizarIdPorArea()">
+                    <select id="area" required onchange="cambiarAreaMedica()">
                         <option value="" disabled selected>Seleccione un área...</option>
                         <option value="MEDICINA GENERAL">MEDICINA GENERAL</option>
                         <option value="ODONTOLOGIA">ODONTOLOGIA</option>
@@ -369,58 +369,7 @@
                     <div class="service-row">
                         <div class="service-container">
                             <select id="servicio" required onchange="cargarPrecioAutomatico()">
-                                <option value="" disabled selected>Seleccione o busque un servicio...</option>
-                                <option value="HEMOGRAMA COMPLETO" data-precio="30">1. HEMOGRAMA COMPLETO</option>
-                                <option value="GLUCOSA" data-precio="10">2. GLUCOSA</option>
-                                <option value="COLESTEROL" data-precio="10">3. COLESTEROL</option>
-                                <option value="TRIGRICELIDOS" data-precio="10">4. TRIGRICELIDOS</option>
-                                <option value="UREA" data-precio="10">5. UREA</option>
-                                <option value="CREATININA" data-precio="10">6. CREATININA</option>
-                                <option value="ACIDO URICO" data-precio="20">7. ACIDO URICO</option>
-                                <option value="BILIRRUBINA TOTAL, DIRECTA Y INDIRECTA" data-precio="30">8. BILIRRUBINA TOTAL, DIRECTA Y INDIRECTA</option>
-                                <option value="TGO" data-precio="10">9. TGO</option>
-                                <option value="TGP" data-precio="10">10. TGP</option>
-                                <option value="FOSFATASA ALALINA SIMPLE" data-precio="10">11. FOSFATASA ALALINA SIMPLE</option>
-                                <option value="PROTEINAS TOTALES" data-precio="10">12. PROTEINAS TOTALES</option>
-                                <option value="ALBUMINA" data-precio="10">13. ALBUMINA</option>
-                                <option value="GLOBULINA" data-precio="10">14. GLOBULINA</option>
-                                <option value="EXAMEN DE HECES SIMPLE" data-precio="10">15. EXAMEN DE HECES SIMPLE</option>
-                                <option value="COPROOLOGICO FUNCIONAL" data-precio="40">16. COPROOLOGICO FUNCIONAL</option>
-                                <option value="EXAMEN SERIADO DE HECES" data-precio="20">17. EXAMEN SERIADO DE HECES</option>
-                                <option value="TEST DE GRAHAM" data-precio="15">18. TEST DE GRAHAM</option>
-                                <option value="REACCION INFLAMATORIA" data-precio="20">19. REACCION INFLAMATORIA</option>
-                                <option value="EXAMEN COMPLETO DE HORINA" data-precio="10">20. EXAMEN COMPLETO DE HORINA</option>
-                                <option value="UROCULTIVO" data-precio="50">21. UROCULTIVO</option>
-                                <option value="DESCARTE DE EMBARAZO ( CUALITATIVO)" data-precio="20">22. DESCARTE DE EMBARAZO ( CUALITATIVO)</option>
-                                <option value="DESCARTE DE EMBARAZO ( CUANTITATIVO)" data-precio="50">23. DESCARTE DE EMBARAZO ( CUANTITATIVO)</option>
-                                <option value="PCR CUALITATIVO" data-precio="20">24. PCR CUALITATIVO</option>
-                                <option value="PCR CUANTITATIVO" data-precio="50">25. PCR CUANTITATIVO</option>
-                                <option value="FACTOR REMATOIDEO" data-precio="20">26. FACTOR REMATOIDEO</option>
-                                <option value="ACLUTINACIONES" data-precio="20">27. ACLUTINACIONES</option>
-                                <option value="HEMOGLOBINA" data-precio="10">28. HEMOGLOBINA</option>
-                                <option value="GRUPO Y FACTOR ABO" data-precio="15">29. GRUPO Y FACTOR ABO</option>
-                                <option value="PRUEBA DE HELICOBACTER PYLORI" data-precio="30">30. PRUEBA DE HELICOBACTER PYLORI</option>
-                                <option value="DUAL VIH SIFILIS" data-precio="50">31. DUAL VIH SIFILIS</option>
-                                <option value="DESCARTE DE VIH" data-precio="30">32. DESCARTE DE VIH</option>
-                                <option value="DESCRATE DE SIFILIS" data-precio="30">33. DESCRATE DE SIFILIS</option>
-                                <option value="HEPATITIS A" data-precio="30">34. HEPATITIS A</option>
-                                <option value="HEBATTITIS B" data-precio="30">35. HEBATTITIS B</option>
-                                <option value="HEPATITIS C" data-precio="30">36. HEPATITIS C</option>
-                                <option value="TP Y IMR" data-precio="30">37. TP Y IMR</option>
-                                <option value="TP-IMR-TTPA" data-precio="50">38. TP-IMR-TTPA</option>
-                                <option value="HEMOGLOBINA GLICOSILADA" data-precio="50">39. HEMOGLOBINA GLICOSILADA</option>
-                                <option value="TOLERANCIA A LA GLUCOSA" data-precio="40">40. TOLERANCIA A LA GLUCOSA</option>
-                                <option value="TIEMPO SANGRIA Y TIEMPO DE GOAGULACION" data-precio="10">41. TIEMPO SANGRIA Y TIEMPO DE GOAGULACION</option>
-                                <option value="BK ESPUTO" data-precio="20">42. BK ESPUTO</option>
-                                <option value="SECRECION VAGINAL" data-precio="20">43. SECRECION VAGINAL</option>
-                                <option value="CULTIVO DE SECRECION VAGINAL" data-precio="50">44. CULTIVO DE SECRECION VAGINAL</option>
-                                <option value="SECRECION DE GLANDE" data-precio="20">45. SECRECION DE GLANDE</option>
-                                <option value="SECRECION DE PIEL" data-precio="20">46. SECRECION DE PIEL</option>
-                                <option value="TEST DE HELECHO" data-precio="20">47. TEST DE HELECHO</option>
-                                <option value="CERTIFICADO DE SALUBRIDA" data-precio="20">48. CERTIFICADO DE SALUBRIDA</option>
-                                <option value="AGA Y ELECTROLITOS" data-precio="120">49. AGA Y ELECTROLITOS</option>
-                                <option value="LAMINA PERIFERICA" data-precio="50">50. LAMINA PERIFERICA</option>
-                                <option value="GOTA GRUESA Y BARTONELIA" data-precio="20">51. GOTA GRUESA Y BARTONELIA</option>
+                                <option value="" disabled selected>Primero seleccione un área médica...</option>
                             </select>
                             <button type="button" class="search-btn" onclick="buscarServicio()">🔍 Buscar</button>
                         </div>
@@ -526,7 +475,6 @@
         if (!horaStr) return '';
         let horaLimpia = String(horaStr).trim();
 
-        // Extrae las horas y minutos limpiamente ignorando la fecha base de Google Sheets
         let match = horaLimpia.match(/(\d{2}):(\d{2}):(\d{2})/);
         if (!match) {
             match = horaLimpia.match(/(\d{2}):(\d{2})/);
@@ -579,7 +527,7 @@
             usuarios.forEach(u => {
                 if (u.usuario.toUpperCase() === usuarioInput && String(u.pin) === String(pinInput)) {
                     encontrado = true;
-                    usuarioActualNombre = u.nombre || usuarioInput; // Extrae el nombre de la Columna C
+                    usuarioActualNombre = u.nombre || usuarioInput;
                 }
             });
 
@@ -636,10 +584,47 @@
         document.getElementById('area').selectedIndex = 0;
         document.getElementById('citaId').value = "SELECCIONE-AREA";
         
+        // Limpiar servicios y precio
+        const servicioSelect = document.getElementById('servicio');
+        servicioSelect.innerHTML = '<option value="" disabled selected>Primero seleccione un área médica...</option>';
+        document.getElementById('precioServicio').value = '';
+
         const yyyy = ahora.getFullYear();
         const mm = String(ahora.getMonth() + 1).padStart(2, '0');
         const dd = String(ahora.getDate()).padStart(2, '0');
         document.getElementById('fechaCita').value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function cambiarAreaMedica() {
+        actualizarIdPorArea();
+        const areaSelect = document.getElementById('area').value;
+        const servicioSelect = document.getElementById('servicio');
+        
+        servicioSelect.innerHTML = '<option value="" disabled selected>Cargando servicios de ' + areaSelect + '...</option>';
+        document.getElementById('precioServicio').value = '';
+
+        try {
+            const response = await fetch(URL_APPS_SCRIPT + `?action=tarifario&area=${encodeURIComponent(areaSelect)}`);
+            const listaServicios = await response.json();
+
+            servicioSelect.innerHTML = '<option value="" disabled selected>Seleccione o busque un servicio...</option>';
+            
+            if (listaServicios.length === 0) {
+                servicioSelect.innerHTML = '<option value="" disabled selected>No hay servicios registrados en esta hoja</option>';
+                return;
+            }
+
+            listaServicios.forEach((item, index) => {
+                let opt = document.option ? document.createElement('option') : document.createElement('option');
+                opt.value = item.servicio;
+                opt.setAttribute('data-precio', item.costo);
+                opt.textContent = `${index + 1}. ${item.servicio}`;
+                servicioSelect.appendChild(opt);
+            });
+        } catch (error) {
+            console.error('Error al cargar tarifario:', error);
+            servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
+        }
     }
 
     function actualizarIdPorArea() {
@@ -686,7 +671,7 @@
         }
 
         if (!encontrado) {
-            alert("No se encontró ningún servicio con ese nombre en el tarifario.");
+            alert("No se encontró ningún servicio con ese nombre en esta área.");
         }
     }
 
