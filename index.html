@@ -371,7 +371,7 @@
                             <select id="servicio" required onchange="cargarPrecioAutomatico()">
                                 <option value="" disabled selected>Primero seleccione un área médica...</option>
                             </select>
-                            <button type="button" class="search-btn" onclick="buscarServicio()">🔍 Buscar</button>
+                            <button type="button" class="search-btn" onclick="enfocarBusquedaServicio()">🔍 Buscar</button>
                         </div>
                         <div>
                             <input type="text" id="precioServicio" placeholder="Costo S/" required>
@@ -450,6 +450,7 @@
     let fechaActualGlobal = "";
     let horaActualGlobal = "";
     let usuarioActualNombre = "";
+    let listaServiciosCache = []; // Almacena los servicios del área actual para filtrado rápido
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
@@ -584,7 +585,7 @@
         document.getElementById('area').selectedIndex = 0;
         document.getElementById('citaId').value = "SELECCIONE-AREA";
         
-        // Limpiar servicios y precio
+        listaServiciosCache = [];
         const servicioSelect = document.getElementById('servicio');
         servicioSelect.innerHTML = '<option value="" disabled selected>Primero seleccione un área médica...</option>';
         document.getElementById('precioServicio').value = '';
@@ -605,25 +606,46 @@
 
         try {
             const response = await fetch(URL_APPS_SCRIPT + `?action=tarifario&area=${encodeURIComponent(areaSelect)}`);
-            const listaServicios = await response.json();
+            listaServiciosCache = await response.json();
 
-            servicioSelect.innerHTML = '<option value="" disabled selected>Seleccione o busque un servicio...</option>';
-            
-            if (listaServicios.length === 0) {
-                servicioSelect.innerHTML = '<option value="" disabled selected>No hay servicios registrados en esta hoja</option>';
-                return;
-            }
-
-            listaServicios.forEach((item, index) => {
-                let opt = document.option ? document.createElement('option') : document.createElement('option');
-                opt.value = item.servicio;
-                opt.setAttribute('data-precio', item.costo);
-                opt.textContent = `${index + 1}. ${item.servicio}`;
-                servicioSelect.appendChild(opt);
-            });
+            renderizarOpcionesServicios(listaServiciosCache);
         } catch (error) {
             console.error('Error al cargar tarifario:', error);
             servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
+        }
+    }
+
+    function renderizarOpcionesServicios(lista) {
+        const servicioSelect = document.getElementById('servicio');
+        servicioSelect.innerHTML = '<option value="" disabled selected>Seleccione o busque un servicio...</option>';
+        
+        if (lista.length === 0) {
+            servicioSelect.innerHTML = '<option value="" disabled selected>No hay servicios registrados</option>';
+            return;
+        }
+
+        lista.forEach((item, index) => {
+            let opt = document.createElement('option');
+            opt.value = item.servicio;
+            opt.setAttribute('data-precio', item.costo);
+            opt.textContent = `${index + 1}. ${item.servicio} (S/ ${item.costo})`;
+            servicioSelect.appendChild(opt);
+        });
+    }
+
+    function enfocarBusquedaServicio() {
+        let termino = prompt("Escriba parte del nombre del servicio para filtrar la lista:");
+        if (termino === null) return;
+        
+        termino = termino.toLowerCase().trim();
+        const filtrados = listaServiciosCache.filter(item => item.servicio.toLowerCase().includes(termino));
+        
+        if (filtrados.length > 0) {
+            renderizarOpcionesServicios(filtrados);
+            document.getElementById('servicio').selectedIndex = 1; // Selecciona el primer resultado
+            cargarPrecioAutomatico();
+        } else {
+            alert("No se encontraron servicios con ese término.");
         }
     }
 
@@ -649,29 +671,6 @@
         const precio = optionSeleccionada.getAttribute('data-precio');
         if (precio) {
             document.getElementById('precioServicio').value = precio;
-        }
-    }
-
-    function buscarServicio() {
-        let termino = prompt("Ingrese el nombre del examen o servicio que desea buscar:");
-        if (!termino) return;
-        
-        termino = termino.toLowerCase();
-        let select = document.getElementById('servicio');
-        let opciones = select.options;
-        let encontrado = false;
-
-        for (let i = 0; i < opciones.length; i++) {
-            if (opciones[i].text.toLowerCase().includes(termino)) {
-                select.selectedIndex = i;
-                encontrado = true;
-                cargarPrecioAutomatico();
-                break;
-            }
-        }
-
-        if (!encontrado) {
-            alert("No se encontró ningún servicio con ese nombre en esta área.");
         }
     }
 
