@@ -651,7 +651,6 @@
         contenedor.style.display = 'block';
     }
 
-    // Ocultar resultados si hace clic fuera
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.autocomplete-wrapper')) {
             const contenedor = document.getElementById('listaResultados');
@@ -706,7 +705,7 @@
         const costoInput = document.getElementById('precioServicio').value.trim();
 
         if (!servicioInput || !costoInput) {
-            alert("Por favor seleccione un servicio válido de la lista.");
+            alert("Por favor seleccione un servicio válido de la lista desplegable.");
             return;
         }
 
