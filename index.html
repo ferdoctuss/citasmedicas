@@ -524,16 +524,35 @@
 
     function formatearHoraSimple(horaStr) {
         if (!horaStr) return '';
-        if (horaStr.includes(':') && horaStr.length <= 5) {
-            let partes = horaStr.split(':');
-            let h = parseInt(partes[0]);
-            let m = partes[1];
+        let horaLimpia = String(horaStr).trim();
+
+        if (horaLimpia.includes('T') && horaLimpia.includes('Z')) {
+            try {
+                let d = new Date(horaLimpia);
+                if (!isNaN(d.getTime())) {
+                    let h = d.getUTCHours();
+                    let m = d.getUTCMinutes();
+                    let ampm = h >= 12 ? 'PM' : 'AM';
+                    h = h % 12;
+                    h = h ? h : 12;
+                    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+                }
+            } catch (e) {
+                console.error("Error al formatear hora ISO:", e);
+            }
+        }
+
+        let match = horaLimpia.match(/(\d{2}):(\d{2})/);
+        if (match) {
+            let h = parseInt(match[1]);
+            let m = match[2];
             let ampm = h >= 12 ? 'PM' : 'AM';
             h = h % 12;
             h = h ? h : 12;
             return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
         }
-        return horaStr;
+
+        return horaLimpia;
     }
 
     async function verificarLogin() {
