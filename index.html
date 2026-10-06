@@ -148,42 +148,6 @@
             cursor: not-allowed;
         }
 
-        /* ESTILOS PARA EL BUSCADOR FLOTANTE DE SERVICIOS */
-        .autocomplete-container {
-            position: relative;
-            width: 100%;
-        }
-
-        .autocomplete-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 6px 6px;
-            max-height: 220px;
-            overflow-y: auto;
-            z-index: 99;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-            display: none;
-        }
-
-        .autocomplete-option {
-            padding: 10px 12px;
-            cursor: pointer;
-            font-size: 14px;
-            border-bottom: 1px solid #f1f1f1;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .autocomplete-option:hover {
-            background-color: var(--primary-bg);
-            color: var(--primary-color);
-        }
-
         .service-row {
             display: grid;
             grid-template-columns: 3fr 1fr;
@@ -259,9 +223,86 @@
         .loading { padding: 20px; text-align: center; font-weight: bold; color: var(--primary-color); }
         .print-ticket { display: none; }
 
+        /* ESTILOS DEL MODAL MODERNO (ESTILO FOTO 1) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            display: none;
+        }
+        .modal-card {
+            background: #ffffff;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            border-top: 6px solid #d90429;
+            animation: modalScale 0.2s ease-in-out;
+        }
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-title {
+            color: #d90429;
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .modal-msg {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .modal-submsg {
+            font-size: 0.9rem;
+            color: #d90429;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .modal-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+        .modal-btn-cancel:hover { background-color: #5a6268; }
+        .modal-btn-confirm {
+            background-color: #d90429;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1.5;
+        }
+        .modal-btn-confirm:hover { background-color: #b50322; }
+
         @media print {
             body { background: white; padding: 0; margin: 0; }
-            .container, .view, .home-menu, .search-container, .menu-btn, .brand-header, .subtitle, .table-container { display: none !important; }
+            .container, .view, .home-menu, .search-container, .menu-btn, .brand-header, .subtitle, .table-container, .modal-overlay { display: none !important; }
             .print-ticket {
                 display: block !important;
                 width: 72mm;
@@ -273,15 +314,6 @@
             .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 10px; }
             .ticket-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
             .ticket-footer { margin-top: 15px; border-top: 1px dashed #000; padding-top: 8px; text-align: center; font-size: 10px; line-height: 1.3; }
-        }
-
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr { display: block; width: 100%; }
-            thead tr { position: absolute; top: -9999px; left: -9999px; }
-            tr { margin-bottom: 15px; border: 1px solid #b0bec5; border-top: 4px solid var(--primary-color); border-radius: 8px; background-color: #fff; padding: 5px; }
-            td { border: none; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; text-align: right; font-size: 0.9rem; }
-            td:last-child { border-bottom: 0; }
-            td::before { content: attr(data-label); font-weight: 800; color: var(--primary-color); text-align: left; font-size: 0.75rem; text-transform: uppercase; }
         }
     </style>
 </head>
@@ -380,11 +412,12 @@
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="inputServicio">Servicio / Examen (Tarifario)</label>
+                    <label for="servicio">Servicio / Examen (Tarifario)</label>
                     <div class="service-row">
-                        <div class="autocomplete-container">
-                            <input type="text" id="inputServicio" placeholder="Escriba aquí para buscar servicio..." autocomplete="off" oninput="filtrarServiciosEnVivo()" onfocus="mostrarTodosLosServicios()" required>
-                            <div id="dropdownResultados" class="autocomplete-dropdown"></div>
+                        <div>
+                            <select id="servicio" required onchange="cargarPrecioAutomatico()">
+                                <option value="" disabled selected>Primero seleccione un área médica...</option>
+                            </select>
                         </div>
                         <div>
                             <input type="text" id="precioServicio" placeholder="Costo S/" required readonly>
@@ -434,6 +467,19 @@
     </div>
 </div>
 
+<!-- MODAL DE ADVERTENCIA MODERNIZADO (ESTILO FOTO 1) -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3 class="modal-title">⚠️️ ADVERTENCIA CRÍTICA</h3>
+        <p class="modal-msg" id="modalTextMsg">¿Estás seguro de eliminar este registro?</p>
+        <p class="modal-submsg">¡No habrá manera de recuperarlo!</p>
+        <div class="modal-buttons">
+            <button type="button" class="modal-btn-cancel" onclick="cerrarModal(false)">Cancelar</button>
+            <button type="button" class="modal-btn-confirm" onclick="cerrarModal(true)">Sí, Eliminar Permanentemente</button>
+        </div>
+    </div>
+</div>
+
 <!-- COMPROBANTE PARA IMPRESIÓN INDIVIDUAL -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
@@ -464,6 +510,7 @@
     let horaActualGlobal = "";
     let usuarioActualNombre = "";
     let listaServiciosCache = [];
+    let callbackModalConfirmacion = null;
 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxgCP57D_ILxnhZUYE9QdMY3JOcUrCsnsGpjUtIF-ZP4klyV--W-2IC877RxHc9tjcq1Q/exec";
 
@@ -599,10 +646,9 @@
         document.getElementById('citaId').value = "SELECCIONE-AREA";
         
         listaServiciosCache = [];
-        document.getElementById('inputServicio').value = '';
-        document.getElementById('inputServicio').placeholder = "Primero seleccione un área médica...";
+        const servicioSelect = document.getElementById('servicio');
+        servicioSelect.innerHTML = '<option value="" disabled selected>Primero seleccione un área médica...</option>';
         document.getElementById('precioServicio').value = '';
-        document.getElementById('dropdownResultados').style.display = 'none';
 
         const yyyy = ahora.getFullYear();
         const mm = String(ahora.getMonth() + 1).padStart(2, '0');
@@ -613,72 +659,39 @@
     async function cambiarAreaMedica() {
         actualizarIdPorArea();
         const areaSelect = document.getElementById('area').value;
-        const inputServicio = document.getElementById('inputServicio');
+        const servicioSelect = document.getElementById('servicio');
         
-        inputServicio.value = '';
-        inputServicio.placeholder = `Cargando servicios de ${areaSelect}...`;
+        servicioSelect.innerHTML = '<option value="" disabled selected>Cargando servicios...</option>';
         document.getElementById('precioServicio').value = '';
 
         try {
             const response = await fetch(URL_APPS_SCRIPT + `?action=tarifario&area=${encodeURIComponent(areaSelect)}`);
             listaServiciosCache = await response.json();
 
-            inputServicio.placeholder = "Escriba para buscar servicio en tiempo real...";
+            renderizarOpcionesServicios(listaServiciosCache);
         } catch (error) {
             console.error('Error al cargar tarifario:', error);
-            inputServicio.placeholder = "Error al cargar servicios";
+            servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
         }
     }
 
-    function mostrarTodosLosServicios() {
-        if (listaServiciosCache.length > 0) {
-            renderizarDropdown(listaServiciosCache);
-        }
-    }
-
-    function filtrarServiciosEnVivo() {
-        const input = document.getElementById('inputServicio');
-        const filtro = input.value.toLowerCase().trim();
+    function renderizarOpcionesServicios(lista) {
+        const servicioSelect = document.getElementById('servicio');
+        servicioSelect.innerHTML = '<option value="" disabled selected>Seleccione un servicio...</option>';
         
-        if (filtro === "") {
-            document.getElementById('precioServicio').value = "";
-        }
-
-        const filtrados = listaServiciosCache.filter(item => item.servicio.toLowerCase().includes(filtro));
-        renderizarDropdown(filtrados);
-    }
-
-    function renderizarDropdown(lista) {
-        const contenedor = document.getElementById('dropdownResultados');
-        contenedor.innerHTML = '';
-
         if (lista.length === 0) {
-            contenedor.style.display = 'none';
+            servicioSelect.innerHTML = '<option value="" disabled selected>No hay servicios registrados</option>';
             return;
         }
 
-        lista.forEach(item => {
-            let div = document.createElement('div');
-            div.className = 'autocomplete-option';
-            div.innerHTML = `<span><strong>${item.servicio}</strong></span> <span style="color: var(--primary-color);">S/ ${item.costo}</span>`;
-            div.onclick = function() {
-                document.getElementById('inputServicio').value = item.servicio;
-                document.getElementById('precioServicio').value = item.costo;
-                contenedor.style.display = 'none';
-            };
-            contenedor.appendChild(div);
+        lista.forEach((item, index) => {
+            let opt = document.createElement('option');
+            opt.value = item.servicio;
+            opt.setAttribute('data-precio', item.costo);
+            opt.textContent = `${index + 1}. ${item.servicio} (S/ ${item.costo})`;
+            servicioSelect.appendChild(opt);
         });
-
-        contenedor.style.display = 'block';
     }
-
-    // Ocultar dropdown al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.autocomplete-container')) {
-            const contenedor = document.getElementById('dropdownResultados');
-            if (contenedor) contenedor.style.display = 'none';
-        }
-    });
 
     function actualizarIdPorArea() {
         const areaSelect = document.getElementById('area').value;
@@ -694,6 +707,15 @@
 
         const idGenerado = `${sigla}-${fechaPartes}-${horaPartes}`;
         document.getElementById('citaId').value = idGenerado;
+    }
+
+    function cargarPrecioAutomatico() {
+        const select = document.getElementById('servicio');
+        const optionSeleccionada = select.options[select.selectedIndex];
+        const precio = optionSeleccionada.getAttribute('data-precio');
+        if (precio) {
+            document.getElementById('precioServicio').value = precio;
+        }
     }
 
     function limpiarBusqueda() {
@@ -723,11 +745,11 @@
     document.getElementById('appointmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const servicioInput = document.getElementById('inputServicio').value.trim();
+        const servicioSelect = document.getElementById('servicio');
         const costoInput = document.getElementById('precioServicio').value.trim();
 
-        if (!servicioInput || !costoInput) {
-            alert("Por favor seleccione un servicio válido de la lista desplegable.");
+        if (!servicioSelect.value || !costoInput) {
+            alert("Por favor seleccione un servicio válido de la lista.");
             return;
         }
 
@@ -740,7 +762,7 @@
             paciente: document.getElementById('nombrePaciente').value,
             edad: document.getElementById('edadPaciente').value,
             dni: document.getElementById('dniPaciente').value,
-            servicio: servicioInput,
+            servicio: servicioSelect.value,
             costo: costoInput,
             fechaCita: document.getElementById('fechaCita').value,
             horaCita: document.getElementById('horaCita').value,
@@ -855,11 +877,30 @@
         window.print();
     }
 
-    function cancelarCita(index) {
+    // FUNCIONES DEL MODAL DE ADVERTENCIA MODERNO
+    function mostrarModalPersonalizado(mensaje) {
+        return new Promise((resolve) => {
+            document.getElementById('modalTextMsg').innerText = mensaje;
+            document.getElementById('customModal').style.display = 'flex';
+            callbackModalConfirmacion = resolve;
+        });
+    }
+
+    function cerrarModal(resultado) {
+        document.getElementById('customModal').style.display = 'none';
+        if (callbackModalConfirmacion) {
+            callbackModalConfirmacion(resultado);
+            callbackModalConfirmacion = null;
+        }
+    }
+
+    async function cancelarCita(index) {
         const c = globalCitasData[index];
-        const confirmacion = confirm(`¿Está seguro que desea cancelar la cita con ID: ${c.id} para el paciente ${c.paciente}?`);
+        const mensaje = `¿Estás seguro de cancelar la cita ID: ${c.id} para el paciente ${c.paciente}?`;
         
-        if (confirmacion) {
+        const confirmado = await mostrarModalPersonalizado(mensaje);
+        
+        if (confirmado) {
             fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
                 mode: 'no-cors',
