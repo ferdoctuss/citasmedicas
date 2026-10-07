@@ -300,7 +300,7 @@
         }
         .modal-btn-confirm:hover { background-color: #b50322; }
 
-        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM CORREGIDA */
+        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM CON PIE DE PÁGINA EN NEGRITA */
         @media print {
             body { 
                 background: white; 
@@ -319,7 +319,7 @@
             .print-ticket {
                 display: block !important;
                 width: 74mm;
-                padding: 2mm 2mm 15mm 2mm; /* Cero exceso arriba, espacio limpio abajo para evitar que se pase de hoja */
+                padding: 2mm 2mm 15mm 2mm;
                 margin: 0 auto;
                 font-family: 'Courier New', Courier, monospace;
                 color: #000;
@@ -354,6 +354,7 @@
                 text-align: center; 
                 font-size: 11px; 
                 line-height: 1.4; 
+                font-weight: bold; /* Pone todo el pie de página en negrita */
             }
         }
     </style>
@@ -521,7 +522,7 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM CORREGIDO) -->
+<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM CON PIE EN NEGRITA) -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-header">
         <h2 style="margin:0; font-size: 15px;">CENTRO MÉDICO INTEGRAL SANTA CELIA</h2>
