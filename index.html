@@ -300,7 +300,7 @@
         }
         .modal-btn-confirm:hover { background-color: #b50322; }
 
-        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM OPTIMIZADA */
+        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM CON MÁRGENES Y LÍNEAS DE CORTE */
         @media print {
             body { 
                 background: white; 
@@ -313,18 +313,25 @@
             
             @page {
                 size: 80mm auto;
-                margin: 2mm;
+                margin: 0mm;
             }
 
             .print-ticket {
                 display: block !important;
                 width: 74mm;
-                padding: 2mm;
+                padding: 4mm 2mm;
                 margin: 0 auto;
                 font-family: 'Courier New', Courier, monospace;
                 color: #000;
                 font-size: 13px;
                 line-height: 1.4;
+            }
+            .ticket-cut-line {
+                text-align: center;
+                font-size: 11px;
+                letter-spacing: 2px;
+                margin: 15px 0;
+                color: #000;
             }
             .ticket-header { 
                 text-align: center; 
@@ -512,11 +519,12 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM x AUTO) -->
+<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM CON LÍNEAS DE CORTE Y MÁRGENES) -->
 <div id="ticketPrint" class="print-ticket">
+    <div class="ticket-cut-line">- - - - - - - - - - - - - - - - - - - -</div>
     <div class="ticket-header">
         <h2 style="margin:0; font-size: 15px;">CENTRO MÉDICO INTEGRAL SANTA CELIA</h2>
-        <p style="margin: 3px 0 0 0; font-size: 11px;">Comprobante de Cita Médica</p>
+        <p style="margin: 3px 0 0 0; font-size: 11px;">Comprobante de Cita</p>
     </div>
     <div class="ticket-row"><strong>ID:</strong> <span id="t-id"></span></div>
     <div class="ticket-row"><strong>Agendado por:</strong> <span id="t-encargado"></span></div>
@@ -534,6 +542,7 @@
         Teléfono: 949756065<br>
         ¡Gracias por confiar en nosotros!
     </div>
+    <div class="ticket-cut-line">- - - - - - - - - - - - - - - - - - - -</div>
 </div>
 
 <script>
