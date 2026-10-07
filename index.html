@@ -300,7 +300,7 @@
         }
         .modal-btn-confirm:hover { background-color: #b50322; }
 
-        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM CON MÁRGENES TRIPLE DE AMPLIOS */
+        /* CONFIGURACIÓN DE IMPRESIÓN TÉRMICA 80MM CON ESPACIADO AMPLIADO */
         @media print {
             body { 
                 background: white; 
@@ -319,7 +319,7 @@
             .print-ticket {
                 display: block !important;
                 width: 74mm;
-                padding: 35mm 2mm; /* Margen superior e inferior muy amplio (triple de distancia) */
+                padding: 5mm 2mm;
                 margin: 0 auto;
                 font-family: 'Courier New', Courier, monospace;
                 color: #000;
@@ -330,7 +330,6 @@
                 text-align: center;
                 font-size: 11px;
                 letter-spacing: 1px;
-                margin: 35px 0; /* Espacio vertical muy separado */
                 color: #000;
                 white-space: nowrap;
                 overflow: hidden;
@@ -521,9 +520,10 @@
     </div>
 </div>
 
-<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM CON LÍNEAS DE CORTE Y MÁRGENES AMPLIOS) -->
+<!-- COMPROBANTE PARA IMPRESIÓN TÉRMICA (80MM CON SALTOS DE LÍNEA AMPLIOS) -->
 <div id="ticketPrint" class="print-ticket">
     <div class="ticket-cut-line">- - - - - - - - - - - - - - - -</div>
+    <br><br><br>
     <div class="ticket-header">
         <h2 style="margin:0; font-size: 15px;">CENTRO MÉDICO INTEGRAL SANTA CELIA</h2>
         <p style="margin: 3px 0 0 0; font-size: 11px;">Comprobante de Cita</p>
@@ -544,6 +544,7 @@
         Teléfono: 949756065<br>
         ¡Gracias por confiar en nosotros!
     </div>
+    <br><br><br>
     <div class="ticket-cut-line">- - - - - - - - - - - - - - - -</div>
 </div>
 
